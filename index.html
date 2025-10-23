@@ -75,6 +75,34 @@
             
             <!-- Dica de Clique -->
             <div id="click-hint" data-i18n="game.continue">Clique para continuar...</div>
+            
+            <!-- Container de Minijogos -->
+            <div id="minigame-container" style="display: none;"></div>
+        </div>
+        
+        <!-- TELA DE ENTRADA DO NOME DO JOGADOR -->
+        <div id="player-name-screen" class="screen">
+            <div class="screen-content" style="text-align: center; margin-top: 100px;">
+                <div id="portrait-luna-intro" style="height: 300px; margin-bottom: 30px; display: flex; align-items: center; justify-content: center;">
+                    <img id="luna-intro-portrait" src="" alt="Luna" style="max-height: 100%; max-width: 80%;">
+                </div>
+                <h2 style="margin-bottom: 20px;">✨ Olá! Como você se chama?</h2>
+                <p style="margin-bottom: 30px; font-size: 16px;">Luna quer muito conhecer seu nome...</p>
+                <input 
+                    type="text" 
+                    id="player-name-input" 
+                    placeholder="Digite seu nome..." 
+                    class="player-name-input"
+                    maxlength="20"
+                    style="font-size: 18px; padding: 12px; width: 300px; margin-bottom: 20px; border-radius: 5px; border: 2px solid #ddd;"
+                >
+                <br>
+                <button 
+                    onclick="UI.confirmPlayerName()" 
+                    class="menu-btn"
+                    style="font-size: 16px; padding: 12px 30px;"
+                >Confirmar</button>
+            </div>
         </div>
 
         <!-- MENU DE PAUSA -->
@@ -209,6 +237,7 @@
     <script src="js/dialogues.js"></script>
     <script src="js/audio.js"></script>
     <script src="js/save-system.js"></script>
+    <script src="js/minigames.js"></script>
     <script src="js/story.js"></script>
     <script src="js/ui.js"></script>
     <script src="js/game.js"></script>

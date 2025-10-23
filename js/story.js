@@ -3,6 +3,52 @@
 
 const STORY = {
     
+    /* ==================== INICIAL: ENTRADA DO NOME ==================== */
+    
+    intro_askName: [
+        {
+            name: 'Sistema',
+            text: 'O jogo pedirá para você escolher seu nome...',
+            hidePortrait: true,
+            minigame: {
+                type: 'playerName',
+                execute: () => {
+                    UI.showPlayerNameScreen();
+                },
+                onComplete: () => {
+                    game.loadScene('intro_greetings');
+                }
+            },
+            skipDialogue: true // Não mostrar diálogo, apenas executar minijogo
+        }
+    ],
+    
+    intro_greetings: [
+        {
+            name: 'Luna',
+            text: 'Olá, {playerName}! ♥ Que nome lindo...',
+            portrait: 'feliz',
+            character: 'luna',
+            background: 'rua',
+            music: 'normal',
+            sanity: -2
+        },
+        {
+            name: 'Luna',
+            text: 'Meu nome é Luna. Eu sou... sua nova amiga.',
+            portrait: 'normal'
+        },
+        {
+            name: 'Narrador',
+            text: 'Algo nesta voz soa estranho. Hipnotizante. Como se ela já conhecesse você a vida inteira.',
+            hidePortrait: true,
+            sanity: -3
+        },
+        {
+            next: 'cap1_inicio'
+        }
+    ],
+    
     /* ==================== CAPÍTULO 1: O COMEÇO ==================== */
     
     cap1_inicio: [
@@ -258,7 +304,7 @@ const STORY = {
             options: [
                 {
                     text: '✅ "Claro, obrigado pela carona."',
-                    next: 'cap2_carona',
+                    next: 'cap1_celular',
                     effect: (state) => state.flags.aceitouCarona = true,
                     sanity: -10
                 },
@@ -268,6 +314,190 @@ const STORY = {
                     sanity: -5
                 }
             ]
+        }
+    ],
+    
+    /* ==================== CENA INTERMEDIÁRIA: MINIJOGO DO CELULAR ==================== */
+    
+    cap1_celular: [
+        {
+            name: 'Narrador',
+            text: 'Você entram no carro de Luna. Ela dirige com uma mão enquanto a outra fica pousada perto de você.',
+            background: 'rua',
+            hidePortrait: true,
+            music: 'suspense'
+        },
+        {
+            name: 'Luna',
+            text: 'Ei, {playerName}... você poderia me mostrar seu celular?',
+            portrait: 'normal',
+            sanity: -10
+        },
+        {
+            name: 'Você',
+            text: 'Meu celular? Por quê?',
+            hidePortrait: true
+        },
+        {
+            name: 'Luna',
+            text: 'Eu só quero saber mais sobre você. Ver suas fotos, seus contatos, seus segredos...',
+            portrait: 'dark',
+            sanity: -15,
+            visualEffect: 'vignette'
+        },
+        {
+            name: 'Você',
+            text: '(Pensamento) Não... de jeito nenhum.',
+            hidePortrait: true
+        },
+        {
+            choice: true,
+            options: [
+                {
+                    text: '🚗 Chegar em um semáforo vermelho',
+                    next: 'cap1_fuga_semaforo'
+                },
+                {
+                    text: '😅 Mudar de assunto',
+                    next: 'cap2_carona'
+                }
+            ]
+        }
+    ],
+    
+    cap1_fuga_semaforo: [
+        {
+            name: 'Narrador',
+            text: 'O carro para no semáforo. Luna continua dirigindo, mas seus olhos estão fixos em você.',
+            hidePortrait: true,
+            background: 'rua'
+        },
+        {
+            name: 'Luna',
+            text: 'Então... você vai me mostrar ou não?',
+            portrait: 'dark',
+            sanity: -5
+        },
+        {
+            name: 'Narrador',
+            text: 'Você vê a porta do carro. Está destrancada.',
+            hidePortrait: true
+        },
+        {
+            minigame: {
+                type: 'qte',
+                prompt: 'ABRA A PORTA!',
+                duration: 2500
+            },
+            skipDialogue: true
+        },
+        {
+            // Esta linha é alcançada se o QTE for bem-sucedido
+            name: 'Narrador',
+            text: 'Em um reflexo de desespero, você abre a porta do carro!',
+            hidePortrait: true,
+            sanity: -10
+        },
+        {
+            name: 'Luna',
+            text: 'NÃO! {playerName}!',
+            portrait: 'yandere',
+            sanity: -20
+        },
+        {
+            name: 'Narrador',
+            text: 'Você salta do carro e corre pelas ruas. Luna grita seu nome.',
+            hidePortrait: true,
+            sanity: -15
+        },
+        {
+            next: 'cap2_carro'
+        }
+    ],
+    
+    /* ==================== MINIJOGO: DESCOBRIR SEGREDOS DE LUNA ==================== */
+    
+    cap1_segredos: [
+        {
+            name: 'Narrador',
+            text: 'Enquanto Luna está distraída, você vê seu diário aberto no banco de trás. Você consegue ver pistas sobre seus segredos.',
+            hidePortrait: true,
+            background: 'rua',
+            sanity: -5
+        },
+        {
+            minigame: {
+                type: 'logicPuzzle',
+                questions: [
+                    {
+                        question: 'Por quanto tempo Luna te observa?',
+                        options: ['Alguns meses', 'Um ano inteiro', 'Desde o primeiro dia de aula'],
+                        correctIndex: 2
+                    },
+                    {
+                        question: 'O que Luna guarda em seu quarto?',
+                        options: ['Diários', 'Seus pertences roubados', 'Fotos suas'],
+                        correctIndex: 1
+                    },
+                    {
+                        question: 'O que Luna realmente quer?',
+                        options: ['Ser sua amiga', 'Controlar você completamente', 'Ir à escola']
+                    }
+                ]
+            },
+            skipDialogue: true
+        },
+        {
+            name: 'Luna',
+            text: '!! Você estava lendo meu diário?!',
+            portrait: 'yandere',
+            sanity: -20
+        },
+        {
+            next: 'cap2_carro'
+        }
+    ],
+    
+    /* ==================== MINIJOGO: ESCOLHA SOBRE LUNA ==================== */
+    
+    cap1_relacionamento: [
+        {
+            name: 'Narrador',
+            text: 'Luna olha para você com intensidade enquanto dirige. Suas mãos tremem.',
+            hidePortrait: true,
+            background: 'rua',
+            sanity: -10
+        },
+        {
+            name: 'Luna',
+            text: 'Eu só quero que você entenda, {playerName}... Eu faço TUDO por você.',
+            portrait: 'normal',
+            sanity: -5
+        },
+        {
+            minigame: {
+                type: 'relationshipChoice',
+                character: 'Luna',
+                scenario: 'Como você responde a Luna?',
+                options: [
+                    {
+                        text: '💕 "Eu entendo... e eu também gosto de você."',
+                        effect: 15
+                    },
+                    {
+                        text: '😐 "Isso não é amor, Luna. Isso é obsessão."',
+                        effect: -20
+                    },
+                    {
+                        text: '😟 "Deixa eu ir para casa primeiro, depois conversamos."',
+                        effect: 5
+                    }
+                ]
+            },
+            skipDialogue: true
+        },
+        {
+            next: 'cap2_carona'
         }
     ],
     
@@ -1075,7 +1305,392 @@ const STORY = {
             sanity: -50
         },
         {
-            next: 'final_neutro'
+            next: 'cap2_telefone'
+        }
+    ],
+    
+    /* ==================== MINIJOGO: HACKING DO TELEFONE DE LUNA ==================== */
+    
+    cap2_telefone: [
+        {
+            name: 'Narrador',
+            text: 'Você consegue pegar o telefone de Luna de seu bolso quando ela não está olhando.',
+            hidePortrait: true,
+            background: 'rua',
+            sanity: -5
+        },
+        {
+            name: 'Narrador',
+            text: 'O telefone está bloqueado, mas você se lembra: Luna mencionou sobre seus hobbies uma vez...',
+            hidePortrait: true
+        },
+        {
+            name: 'Narrador',
+            text: 'Talvez o código seja a data de quando vocês se conheceram?',
+            hidePortrait: true
+        },
+        {
+            minigame: {
+                type: 'phoneHacking',
+                correctCode: '1104',
+                hint: 'Data especial para Luna',
+                execute: (success) => {
+                    if (success) {
+                        game.loadScene('cap2_telefone_sucesso');
+                    } else {
+                        game.loadScene('cap2_telefone_fracasso');
+                    }
+                }
+            },
+            skipDialogue: true
+        }
+    ],
+    
+    cap2_telefone_sucesso: [
+        {
+            name: 'Narrador',
+            text: 'DESBLOQUEADO! Você consegue acessar o telefone de Luna!',
+            hidePortrait: true,
+            sanity: 10,
+            visualEffect: 'vignette'
+        },
+        {
+            name: 'Narrador',
+            text: '10.000 fotos suas em diferentes pastas nomeadas "Meu Amor", "Meu Príncipe", "Somente Meu"...',
+            hidePortrait: true,
+            sanity: -25
+        },
+        {
+            name: 'Luna',
+            text: '{playerName}... meu telefone...?',
+            portrait: 'triste',
+            sanity: -10
+        },
+        {
+            choice: true,
+            options: [
+                {
+                    text: '📞 Ligar para polícia AGORA',
+                    next: 'cap2_policia',
+                    effect: (state) => state.flags.chamoPolicia = true
+                },
+                {
+                    text: '😟 Confrontar Luna sobre as fotos',
+                    next: 'cap2_confronto_fotos'
+                }
+            ]
+        }
+    ],
+    
+    cap2_telefone_fracasso: [
+        {
+            name: 'Luna',
+            text: 'O QUÊ?! Você está mexendo no meu telefone?!',
+            portrait: 'yandere',
+            sanity: -20
+        },
+        {
+            name: 'Narrador',
+            text: 'Luna arranca o telefone de sua mão com raiva.',
+            hidePortrait: true,
+            sanity: -15
+        },
+        {
+            name: 'Luna',
+            text: 'Você não confia em mim, {playerName}? Depois de tudo que faço por você?',
+            portrait: 'dark',
+            sanity: -10
+        },
+        {
+            next: 'cap2_carro'
+        }
+    ],
+    
+    /* ==================== CENA: CONFRONTAÇÃO SOBRE AS FOTOS ==================== */
+    
+    cap2_confronto_fotos: [
+        {
+            name: 'Você',
+            text: 'Luna, isso é loucura! Fotos de mim? Constantemente me vigiando?',
+            hidePortrait: true,
+            background: 'rua'
+        },
+        {
+            name: 'Luna',
+            text: 'Não é vigilância! É AMOR, {playerName}! Amor puro e absoluto!',
+            portrait: 'yandere',
+            sanity: -15
+        },
+        {
+            name: 'Narrador',
+            text: 'Luna começa a chorar e rir ao mesmo tempo. Seu comportamento fica cada vez mais instável.',
+            hidePortrait: true,
+            sanity: -10
+        },
+        {
+            name: 'Luna',
+            text: 'Você quer sair daqui? Quer me deixar? NINGUÉM me deixa, {playerName}.',
+            portrait: 'dark',
+            sanity: -20,
+            music: 'terror'
+        },
+        {
+            choice: true,
+            options: [
+                {
+                    text: '🏃 Tentar correr para a porta',
+                    next: 'cap2_fuga_carro',
+                    effect: (state) => state.flags.tentouFugir = true
+                },
+                {
+                    text: '💬 Tentar acalmar Luna',
+                    next: 'cap2_dialologo_battle'
+                }
+            ]
+        }
+    ],
+    
+    /* ==================== MINIJOGO: DIALOGUE BATTLE ==================== */
+    
+    cap2_dialologo_battle: [
+        {
+            name: 'Narrador',
+            text: 'Você tenta argumentar com Luna, apontando as inconsistências em seu pensamento...',
+            hidePortrait: true,
+            background: 'rua'
+        },
+        {
+            minigame: {
+                type: 'dialogueBattle',
+                arguments: [
+                    {
+                        luna: 'Você é MINHA propriedade. A lei não importa para o amor verdadeiro.',
+                        options: [
+                            { text: 'O amor verdadeiro envolve consentimento mútuo.', correct: true },
+                            { text: 'Você é a rainha do meu coração!', correct: false }
+                        ]
+                    },
+                    {
+                        luna: 'Se você tentar me deixar, vou me machucar!',
+                        options: [
+                            { text: 'Isso é manipulação emocional, Luna.', correct: true },
+                            { text: 'Farei qualquer coisa se isso me ajudar!', correct: false }
+                        ]
+                    },
+                    {
+                        luna: 'Ninguém mais vai te amar como eu!',
+                        options: [
+                            { text: 'Amor saudável não funciona assim. Isso é obsessão.', correct: true },
+                            { text: 'Você é a única para mim.', correct: false }
+                        ]
+                    }
+                ]
+            },
+            skipDialogue: true
+        },
+        {
+            name: 'Luna',
+            text: '...',
+            portrait: 'triste'
+        },
+        {
+            name: 'Narrador',
+            text: 'Por um momento, Luna parece refletir sobre suas palavras.',
+            hidePortrait: true,
+            sanity: 15
+        },
+        {
+            choice: true,
+            options: [
+                {
+                    text: '🏃 Correr para a porta AGORA!',
+                    next: 'cap2_fuga_carro',
+                    effect: (state) => state.flags.tentouFugir = true
+                },
+                {
+                    text: '💭 Deixar Luna processar suas palavras',
+                    next: 'cap2_momento_paz'
+                }
+            ]
+        }
+    ],
+    
+    cap2_momento_paz: [
+        {
+            name: 'Narrador',
+            text: 'Você senta ao lado de Luna, esperando ela processar o que foi dito.',
+            hidePortrait: true,
+            background: 'rua',
+            sanity: -5
+        },
+        {
+            name: 'Luna',
+            text: 'Eu... eu só quero que você me ame, {playerName}... Como é possível que isso seja errado?',
+            portrait: 'normal',
+            sanity: -10
+        },
+        {
+            name: 'Você',
+            text: 'Porque o amor verdadeiro respeita o outro. Não controla.',
+            hidePortrait: true
+        },
+        {
+            name: 'Luna',
+            text: 'Talvez... talvez eu tenha problemas. Talvez eu precise de ajuda.',
+            portrait: 'normal',
+            sanity: 5
+        },
+        {
+            next: 'cap2_policia'
+        }
+    ],
+    
+    /* ==================== CENA: CHAMANDO A POLÍCIA ==================== */
+    
+    cap2_policia: [
+        {
+            name: 'Você',
+            text: 'Vou chamar a polícia, Luna. Você precisa de ajuda profissional.',
+            hidePortrait: true,
+            background: 'rua'
+        },
+        {
+            name: 'Luna',
+            text: 'NÃO! VOCÊ NÃO PODE ME DEIXAR! EU VOU MORRER SEM VOCÊ!',
+            portrait: 'yandere',
+            sanity: -30,
+            music: 'terror',
+            visualEffect: 'shake'
+        },
+        {
+            name: 'Narrador',
+            text: 'A polícia chega 20 minutos depois. Luna é levada para avaliação psiquiátrica.',
+            hidePortrait: true,
+            sanity: 30
+        },
+        {
+            name: 'Você',
+            text: '(Respirando profundamente) Finalmente livre... ou será que?',
+            hidePortrait: true,
+            sanity: -10
+        },
+        {
+            next: 'final_fuga_sucesso'
+        }
+    ],
+    
+    /* ==================== MINIJOGO: FUGA DO CARRO ==================== */
+    
+    cap2_fuga_carro: [
+        {
+            name: 'Narrador',
+            text: 'Você vê a porta destrancada por um breve momento. Esta é sua chance!',
+            hidePortrait: true,
+            background: 'rua'
+        },
+        {
+            minigame: {
+                type: 'memoryGame',
+                pairs: 4,
+                execute: (success) => {
+                    if (success) {
+                        game.loadScene('cap2_fuga_carro_sucesso');
+                    } else {
+                        game.loadScene('cap2_fuga_carro_fracasso');
+                    }
+                }
+            },
+            skipDialogue: true
+        }
+    ],
+    
+    cap2_fuga_carro_sucesso: [
+        {
+            name: 'Narrador',
+            text: 'Sua mente fica alerta! Você consegue se lembrar exatamente do caminho para a polícia!',
+            hidePortrait: true,
+            background: 'rua',
+            sanity: 20,
+            visualEffect: 'vignette'
+        },
+        {
+            name: 'Você',
+            text: 'AGORA!',
+            hidePortrait: true
+        },
+        {
+            name: 'Narrador',
+            text: 'Você salta do carro e corre em direção à delegacia de polícia que fica a dois quarteirões dali.',
+            hidePortrait: true,
+            sanity: 10
+        },
+        {
+            name: 'Luna',
+            text: '{playerName}! NÃO! VOLTE!',
+            portrait: 'yandere',
+            sanity: -20
+        },
+        {
+            next: 'final_fuga_sucesso'
+        }
+    ],
+    
+    cap2_fuga_carro_fracasso: [
+        {
+            name: 'Narrador',
+            text: 'Sua mente está confusa. Você não consegue se concentrar no caminho...',
+            hidePortrait: true,
+            background: 'rua',
+            sanity: -30
+        },
+        {
+            name: 'Luna',
+            text: 'Não se preocupe, {playerName}. Você não precisa se lembrar. Você só precisa de mim.',
+            portrait: 'feliz',
+            sanity: -20
+        },
+        {
+            name: 'Narrador',
+            text: 'Conforme Luna dirige, você sente seus pensamentos ficando cada vez mais nublados.',
+            hidePortrait: true,
+            sanity: -30
+        },
+        {
+            next: 'cap2_carona'
+        }
+    ],
+    
+    /* ==================== MINIJOGO: PROCURAR PISTAS NA CASA DE LUNA ==================== */
+    
+    cap2_casa_pistas: [
+        {
+            name: 'Narrador',
+            text: 'Você consegue entrar na casa de Luna. É hora de procurar evidências contra ela.',
+            hidePortrait: true,
+            background: 'casa_luna',
+            music: 'suspense'
+        },
+        {
+            minigame: {
+                type: 'observationChallenge',
+                items: [
+                    { symbol: '📔', label: 'Diário', x: 10, y: 20 },
+                    { symbol: '📷', label: 'Câmera', x: 30, y: 40 },
+                    { symbol: '🖼️', label: 'Teu Retrato', x: 50, y: 30 },
+                    { symbol: '💍', label: 'Anel', x: 70, y: 50 },
+                    { symbol: '🔐', label: 'Caixa Trancada', x: 80, y: 20 }
+                ]
+            },
+            skipDialogue: true
+        },
+        {
+            name: 'Narrador',
+            text: 'Você encontrou tudo! Evidências suficientes para apresentar à polícia!',
+            hidePortrait: true,
+            sanity: 20
+        },
+        {
+            next: 'cap2_policia'
         }
     ],
     

@@ -642,6 +642,249 @@
     }
 }
 
+/* ==================== MINIJOGOS RESPONSIVOS ==================== */
+@media (max-width: 768px) {
+    
+    .qte-board,
+    .logic-puzzle-board,
+    .relationship-choice-board {
+        padding: 40px 25px;
+        max-width: 95%;
+        border-radius: 12px;
+    }
+    
+    .qte-prompt {
+        font-size: 1.5em;
+    }
+    
+    .qte-target {
+        width: 120px;
+        height: 120px;
+        font-size: 1.1em;
+    }
+    
+    .logic-puzzle-board h3 {
+        font-size: 1.3em;
+    }
+    
+    .puzzle-option-btn {
+        padding: 12px 20px;
+        font-size: 1em;
+    }
+    
+    .relationship-choice-board h2 {
+        font-size: 1.6em;
+    }
+    
+    .relationship-scenario {
+        font-size: 1em;
+    }
+    
+    .relationship-option-btn {
+        padding: 12px 15px;
+        flex-direction: column;
+        align-items: flex-start;
+    }
+    
+    .option-effect {
+        align-self: flex-start;
+        font-size: 1em;
+        padding: 4px 12px;
+    }
+    
+    .notification {
+        top: 20px;
+        right: 20px;
+        max-width: 90%;
+        padding: 12px 20px;
+    }
+}
+
+@media (max-width: 480px) {
+    
+    .qte-board,
+    .logic-puzzle-board,
+    .relationship-choice-board {
+        padding: 30px 20px;
+    }
+    
+    .qte-prompt {
+        font-size: 1.3em;
+    }
+    
+    .qte-target {
+        width: 100px;
+        height: 100px;
+        font-size: 1em;
+    }
+    
+    .logic-puzzle-board h3 {
+        font-size: 1.1em;
+    }
+    
+    .puzzle-progress {
+        position: static;
+        margin-bottom: 15px;
+    }
+    
+    .puzzle-option-btn {
+        padding: 10px 15px;
+        font-size: 0.95em;
+    }
+    
+    .relationship-choice-board h2 {
+        font-size: 1.4em;
+    }
+    
+    .relationship-scenario {
+        font-size: 0.95em;
+    }
+    
+    .relationship-option-btn {
+        padding: 10px 12px;
+        gap: 10px;
+    }
+    
+    .option-text {
+        font-size: 0.95em;
+    }
+    
+    .option-effect {
+        font-size: 0.9em;
+        padding: 3px 10px;
+    }
+    
+    /* ==================== NOVOS MINIJOGOS - RESPONSIVE ==================== */
+    
+    .memory-game-board {
+        min-width: 350px;
+        padding: 25px;
+    }
+    
+    .memory-cards {
+        grid-template-columns: repeat(3, 1fr);
+    }
+    
+    .memory-card {
+        width: 60px;
+        height: 60px;
+        font-size: 24px;
+    }
+    
+    .dialogue-battle-board {
+        min-width: 400px;
+        padding: 25px;
+    }
+    
+    .observation-board {
+        padding: 25px;
+    }
+    
+    .observation-images {
+        grid-template-columns: 1fr;
+        min-height: auto;
+    }
+    
+    .base-image, .diff-image {
+        min-height: 300px;
+    }
+    
+    .observation-item {
+        font-size: 24px;
+    }
+    
+    .phone-hacking-board {
+        min-width: 300px;
+        padding: 25px;
+    }
+    
+    .phone-screen {
+        font-size: 20px;
+        padding: 20px;
+    }
+    
+    .phone-keypad {
+        grid-template-columns: repeat(3, 1fr);
+        gap: 8px;
+    }
+    
+    .phone-key {
+        padding: 15px;
+        font-size: 16px;
+    }
+}
+
+/* ==================== MOBILE - 480px E ABAIXO ==================== */
+@media screen and (max-width: 480px) {
+    
+    .memory-game-board {
+        min-width: 90vw;
+        padding: 20px;
+    }
+    
+    .memory-cards {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 10px;
+    }
+    
+    .memory-card {
+        width: 50px;
+        height: 50px;
+        font-size: 20px;
+    }
+    
+    .dialogue-battle-board {
+        min-width: 90vw;
+        padding: 20px;
+    }
+    
+    .battle-option-btn {
+        padding: 12px 15px;
+        font-size: 14px;
+    }
+    
+    .observation-board {
+        padding: 20px;
+    }
+    
+    .observation-images {
+        gap: 10px;
+    }
+    
+    .observation-item {
+        font-size: 20px;
+    }
+    
+    .phone-hacking-board {
+        min-width: 90vw;
+        padding: 20px;
+    }
+    
+    .phone-screen {
+        font-size: 18px;
+        padding: 15px;
+    }
+    
+    .phone-code-input {
+        font-size: 16px;
+        padding: 12px;
+    }
+    
+    .phone-keypad {
+        gap: 6px;
+    }
+    
+    .phone-key {
+        padding: 12px;
+        font-size: 14px;
+    }
+    
+    .phone-clear-btn {
+        font-size: 12px;
+        padding: 10px;
+    }
+}
+
 /* ==================== IMPRESSÃO (se necessário) ==================== */
 @media print {
     
@@ -655,7 +898,8 @@
     #sanity-bar,
     #pause-btn,
     #click-hint,
-    .overlay-menu {
+    .overlay-menu,
+    #minigame-container {
         display: none !important;
     }
     

@@ -640,6 +640,168 @@ class UI {
         this.cleanupCredits();
         game.newGame();
     }
+    
+    /* ==================== ENTRADA DO NOME DO JOGADOR ==================== */
+    
+    static showPlayerNameScreen() {
+        console.log('👤 Mostrando tela de entrada do nome do jogador');
+        this.showScreen('player-name-screen');
+        
+        // Tentar mostrar Luna na tela
+        const lunaPortrait = document.getElementById('luna-intro-portrait');
+        if (lunaPortrait && CHARACTERS && CHARACTERS.luna) {
+            lunaPortrait.src = CHARACTERS.luna.portraits.feliz || '';
+        }
+        
+        // Focar no input
+        const input = document.getElementById('player-name-input');
+        if (input) {
+            input.focus();
+            input.onkeypress = (e) => {
+                if (e.key === 'Enter') {
+                    this.confirmPlayerName();
+                }
+            };
+        }
+    }
+    
+    static confirmPlayerName() {
+        const input = document.getElementById('player-name-input');
+        const name = input.value.trim();
+        
+        if (!name || name.length === 0) {
+            console.warn('⚠️ Nome não pode estar vazio');
+            input.style.borderColor = 'red';
+            setTimeout(() => {
+                input.style.borderColor = '';
+            }, 500);
+            return;
+        }
+        
+        if (name.length > 20) {
+            console.warn('⚠️ Nome muito longo');
+            return;
+        }
+        
+        console.log(`✅ Nome confirmado: ${name}`);
+        game.setPlayerName(name);
+        AudioManager.playSFX('click');
+        
+        // Voltar para o jogo
+        this.showScreen('game');
+        
+        // Chamar callback de minijogo se existir
+        if (game.currentMinigameCallback) {
+            console.log('🎮 Chamando callback de minijogo');
+            game.currentMinigameCallback();
+        } else {
+            game.showDialogue();
+        }
+    }
+    
+    /* ==================== MÉTODOS DE SUPORTE PARA MINIJOGOS ==================== */
+    
+    static playMiniGameInvestigation(items, callback) {
+        console.log('🎮 Iniciando minijogo de investigação');
+        MiniGames.investigationGame(items, (success) => {
+            UI.showScreen('game');
+            if (callback) callback(success);
+        });
+        this.showScreen('game'); // Manter na tela do jogo
+    }
+    
+    static playMiniGameSequence(sequence, callback) {
+        console.log('🎮 Iniciando minijogo de sequência');
+        MiniGames.sequencePuzzle(sequence, (success) => {
+            UI.showScreen('game');
+            if (callback) callback(success);
+        });
+        this.showScreen('game');
+    }
+    
+    static playMiniGameReflex(duration, callback) {
+        console.log('🎮 Iniciando minijogo de reflexos');
+        MiniGames.reflexGame(duration, (score) => {
+            UI.showScreen('game');
+            if (callback) callback(score >= 5);
+        });
+        this.showScreen('game');
+    }
+    
+    static playMiniGameAnagram(word, hint, callback) {
+        console.log('🎮 Iniciando minijogo de anagrama');
+        MiniGames.anagramGame(word, hint, (success) => {
+            UI.showScreen('game');
+            if (callback) callback(success);
+        });
+        this.showScreen('game');
+    }
+    
+    static playMiniGameSanityTest(scenario, options, callback) {
+        console.log('🎮 Iniciando minijogo de teste de sanidade');
+        MiniGames.sanityTest(scenario, options, (sanityChange, selectedOption) => {
+            UI.showScreen('game');
+            if (callback) callback(sanityChange, selectedOption);
+        });
+        this.showScreen('game');
+    }
+    
+    /* ==================== NOVOS MINIJOGOS ==================== */
+    
+    static playQuickTimeEvent(prompt, duration = 3000, callback) {
+        console.log('⚡ Iniciando QTE');
+        MiniGames.quickTimeEvent(prompt, duration, (success) => {
+            UI.showScreen('game');
+            if (callback) callback(success);
+        });
+        this.showScreen('game');
+    }
+    
+    static playLogicPuzzle(puzzles, callback) {
+        console.log('🧩 Iniciando puzzle lógico');
+        MiniGames.logicPuzzle(puzzles, (success) => {
+            UI.showScreen('game');
+            if (callback) callback(success);
+        });
+        this.showScreen('game');
+    }
+    
+    static playRelationshipChoice(character, scenario, options, callback) {
+        console.log('💬 Escolha de relacionamento');
+        MiniGames.relationshipChoice(character, scenario, options, (selectedOption, relationshipChange) => {
+            UI.showScreen('game');
+            if (callback) callback(selectedOption, relationshipChange);
+        });
+        this.showScreen('game');
+    }
+    
+    /* ==================== NOTIFICAÇÕES ==================== */
+    
+    static showNotification(message, type = 'info') {
+        console.log(`📢 Notificação (${type}): ${message}`);
+        
+        // Criar elemento de notificação
+        const notification = document.createElement('div');
+        notification.className = `notification notification-${type}`;
+        notification.innerHTML = `
+            <div class="notification-content">
+                ${message}
+            </div>
+        `;
+        
+        // Adicionar ao DOM
+        const container = document.body;
+        container.appendChild(notification);
+        
+        // Animar entrada
+        setTimeout(() => notification.classList.add('show'), 50);
+        
+        // Remover após 3 segundos
+        setTimeout(() => {
+            notification.classList.remove('show');
+            setTimeout(() => notification.remove(), 300);
+        }, 3000);
+    }
 }
 
 /* ==================== EVENT LISTENERS PARA CONFIGURAÇÕES ==================== */

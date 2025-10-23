@@ -9,18 +9,27 @@ class Game {
             sanity: 100,
             typing: false,
             choices: {},
+            playerName: '',
+            playerNameAsked: false,
+            relationships: {
+                luna: 0  // -100 a +100: ódio a amor obsessivo
+            },
             flags: {
                 respondeuBem: false,
                 aceitouCarona: false,
                 entrouCasa: false,
                 tentouFugir: false,
                 manipulou: false,
-                beijouLuna: false
+                beijouLuna: false,
+                lunaAffected: false,
+                questionedLuna: false
             },
             stats: {
                 playTime: 0,
                 choicesMade: 0,
-                scenesViewed: []
+                scenesViewed: [],
+                minigamesCompleted: 0,
+                correctAnswers: 0
             }
         };
         
@@ -89,11 +98,13 @@ class Game {
         
         // Resetar estado
         this.state = {
-            currentScene: 'cap1_inicio',
+            currentScene: 'intro_askName',
             currentIndex: 0,
             sanity: 100,
             typing: false,
             choices: {},
+            playerName: '',
+            playerNameAsked: false,
             flags: {
                 respondeuBem: false,
                 aceitouCarona: false,
@@ -120,6 +131,158 @@ class Game {
         
         // Carregar primeira cena
         this.loadScene(this.state.currentScene);
+    }
+    
+    /* ==================== GERENCIAR NOME DO JOGADOR ==================== */
+    
+    setPlayerName(name) {
+        this.state.playerName = name;
+        this.state.playerNameAsked = true;
+        console.log(`👤 Nome do jogador definido: ${name}`);
+        SaveSystem.autoSave(this.state);
+    }
+    
+    processDialogueText(text) {
+        if (!text) return text;
+        // Substituir placeholders do nome do jogador
+        return text.replace(/{playerName}/g, this.state.playerName || 'Você');
+    }
+    
+    /* ==================== SISTEMA DE RELACIONAMENTO ==================== */
+    
+    modifyRelationship(character, amount) {
+        const current = this.state.relationships[character] || 0;
+        this.state.relationships[character] = Math.max(-100, Math.min(100, current + amount));
+        
+        console.log(`💕 Relacionamento com ${character}: ${this.state.relationships[character]}`);
+        
+        // Efeito visual baseado no mudança
+        if (amount > 0) {
+            AudioManager.playSFX('click');
+            UI.showNotification(`${character}: Relacionamento aumentou! 💚`, 'positive');
+        } else if (amount < 0) {
+            AudioManager.playSFX('error');
+            UI.showNotification(`${character}: Relacionamento diminuiu... 💔`, 'negative');
+        }
+    }
+    
+    getRelationshipLevel(character) {
+        const value = this.state.relationships[character] || 0;
+        if (value > 75) return 'obsessivo';
+        if (value > 50) return 'apaixonado';
+        if (value > 25) return 'amigavel';
+        if (value > 0) return 'neutro_positivo';
+        if (value === 0) return 'neutro';
+        if (value > -25) return 'neutro_negativo';
+        if (value > -50) return 'desconfiado';
+        if (value > -75) return 'hostil';
+        return 'inimigo';
+    }
+    
+    /* ==================== EXECUTAR MINIJOGOS ==================== */
+    
+    executeMinigame(minigameData) {
+        const type = minigameData.type;
+        
+        switch(type) {
+            case 'playerName':
+                // Armazenar callback para quando o nome for confirmado
+                this.currentMinigameCallback = minigameData.onComplete || (() => this.nextLine());
+                if (minigameData.execute) {
+                    minigameData.execute();
+                }
+                break;
+                
+            case 'qte':
+                UI.playQuickTimeEvent(minigameData.prompt, minigameData.duration, (success) => {
+                    this.state.stats.minigamesCompleted++;
+                    if (success) {
+                        this.state.stats.correctAnswers++;
+                    }
+                    setTimeout(() => this.nextLine(), 500);
+                });
+                break;
+                
+            case 'logicPuzzle':
+                UI.playLogicPuzzle(minigameData.questions, (success) => {
+                    this.state.stats.minigamesCompleted++;
+                    if (success) {
+                        this.state.stats.correctAnswers++;
+                    }
+                    setTimeout(() => this.nextLine(), 500);
+                });
+                break;
+                
+            case 'relationshipChoice':
+                UI.playRelationshipChoice(
+                    minigameData.character,
+                    minigameData.scenario,
+                    minigameData.options,
+                    (selectedOption, relationshipChange) => {
+                        this.state.stats.minigamesCompleted++;
+                        setTimeout(() => this.nextLine(), 500);
+                    }
+                );
+                break;
+                
+            case 'investigation':
+                if (minigameData.items && minigameData.callback) {
+                    UI.playMiniGameInvestigation(minigameData.items, () => {
+                        this.state.stats.minigamesCompleted++;
+                        this.state.stats.correctAnswers++;
+                        setTimeout(() => this.nextLine(), 500);
+                    });
+                }
+                break;
+                
+            case 'sequence':
+                if (minigameData.sequence && minigameData.callback) {
+                    UI.playMiniGameSequence(minigameData.sequence, () => {
+                        this.state.stats.minigamesCompleted++;
+                        this.state.stats.correctAnswers++;
+                        setTimeout(() => this.nextLine(), 500);
+                    });
+                }
+                break;
+                
+            case 'reflex':
+                if (minigameData.targets && minigameData.callback) {
+                    UI.playMiniGameReflex(minigameData.targets, (hits, total) => {
+                        this.state.stats.minigamesCompleted++;
+                        if (hits >= total * 0.7) {
+                            this.state.stats.correctAnswers++;
+                        }
+                        setTimeout(() => this.nextLine(), 500);
+                    });
+                }
+                break;
+                
+            case 'anagram':
+                if (minigameData.word && minigameData.hint) {
+                    UI.playMiniGameAnagram(minigameData.word, minigameData.hint, (success) => {
+                        this.state.stats.minigamesCompleted++;
+                        if (success) {
+                            this.state.stats.correctAnswers++;
+                        }
+                        setTimeout(() => this.nextLine(), 500);
+                    });
+                }
+                break;
+                
+            case 'sanityTest':
+                if (minigameData.scenario && minigameData.options) {
+                    UI.playMiniGameSanityTest(minigameData.scenario, minigameData.options, (sanityChange) => {
+                        this.state.stats.minigamesCompleted++;
+                        this.changeSanity(sanityChange);
+                        setTimeout(() => this.nextLine(), 500);
+                    });
+                }
+                break;
+                
+            default:
+                console.warn(`⚠️ Tipo de minijogo desconhecido: ${type}`);
+                setTimeout(() => this.nextLine(), 500);
+        }
     }
     
     loadScene(sceneName) {
@@ -161,6 +324,13 @@ class Game {
             return;
         }
         console.log('📄 Linha a exibir:', line);
+        
+        // Se for minijogo
+        if (line.minigame) {
+            console.log('🎮 Executando minijogo:', line.minigame.type);
+            this.executeMinigame(line.minigame);
+            return;
+        }
         
         // Se for escolha
         if (line.choice) {
@@ -215,7 +385,10 @@ class Game {
         
         // Traduzir nome do personagem e texto do diálogo
         const translatedName = Translations.getDialogue(line.name) || line.name;
-        const translatedText = Translations.getDialogue(line.text);
+        let translatedText = Translations.getDialogue(line.text);
+        
+        // Processar placeholders de nome do jogador
+        translatedText = this.processDialogueText(translatedText);
         
         // Mostrar diálogo com efeito de digitação
         UI.showDialogue(translatedName, translatedText, this.config.textSpeed);
