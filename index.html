@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Luna Wants Me - Visual Novel</title>
+    
+    <!-- CSS -->
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/animations.css">
+    <link rel="stylesheet" href="css/responsive.css">
+</head>
+<body>
+
+    <!-- CONTAINER PRINCIPAL -->
+    <div id="app">
+        
+        <!-- MENU PRINCIPAL -->
+        <div id="menu" class="screen active">
+            <div class="menu-background">
+                <div class="menu-stars"></div>
+            </div>
+            
+            <div class="menu-content">
+                <h1 class="game-title" data-i18n="menu.title">Luna Wants Me</h1>
+                <p class="subtitle" data-i18n="menu.subtitle">"Ela nunca vai deixar você ir..."</p>
+                
+                <div class="menu-buttons">
+                    <button class="menu-btn" onclick="game.newGame()">
+                        <span data-i18n="menu.newGame">Novo Jogo</span>
+                    </button>
+                    <button class="menu-btn" onclick="UI.showScreen('saves')">
+                        <span data-i18n="menu.loadGame">Carregar Jogo</span>
+                    </button>
+                    <button class="menu-btn" onclick="UI.showScreen('config')">
+                        <span data-i18n="menu.settings">Definições</span>
+                    </button>
+                    <button class="menu-btn" onclick="UI.showScreen('credits')">
+                        <span data-i18n="menu.credits">Créditos</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- TELA DO JOGO -->
+        <div id="game" class="screen">
+            <!-- Barra de Sanidade -->
+            <div id="sanity-bar">
+                <div class="sanity-label"><span data-i18n="game.sanity">Sanidade</span>: <span id="sanity-value">100</span>%</div>
+                <div class="sanity-container">
+                    <div id="sanity-fill" style="width: 100%"></div>
+                </div>
+            </div>
+
+            <!-- Menu de Pausa -->
+            <button id="pause-btn" onclick="UI.togglePause()">⏸</button>
+            
+            <!-- Fundo da Cena -->
+            <div id="scene-background"></div>
+            
+            <!-- Efeito de Vinheta -->
+            <div id="vignette"></div>
+            
+            <!-- Personagem -->
+            <div id="character-container">
+                <img id="portrait" src="" alt="" style="display: none;">
+            </div>
+            
+            <!-- Caixa de Diálogo -->
+            <div id="dialog-box">
+                <div id="name-box"></div>
+                <div id="text-box"></div>
+                <div id="choices-box"></div>
+            </div>
+            
+            <!-- Dica de Clique -->
+            <div id="click-hint" data-i18n="game.continue">Clique para continuar...</div>
+        </div>
+
+        <!-- MENU DE PAUSA -->
+        <div id="pause-menu" class="overlay-menu" style="display: none;">
+            <div class="overlay-content">
+                <h2 data-i18n="game.pause">Pausa</h2>
+                <button onclick="UI.togglePause()" data-i18n="game.resume">Continuar</button>
+                <button onclick="UI.showScreen('saves')" data-i18n="game.save">Salvar Jogo</button>
+                <button onclick="UI.showScreen('config')" data-i18n="menu.settings">Definições</button>
+                <button onclick="UI.confirmQuit()" data-i18n="game.return">Voltar ao Menu</button>
+            </div>
+        </div>
+
+        <!-- CONFIGURAÇÕES -->
+        <div id="config" class="screen">
+            <div class="screen-content">
+                <h2 data-i18n="settings.title">Definições</h2>
+                
+                <div class="config-section">
+                    <label data-i18n="settings.musicVolume">Volume da Música</label>
+                    <input type="range" id="music-volume" min="0" max="100" value="50" 
+                           oninput="AudioManager.setMusicVolume(this.value)">
+                    <span id="music-value">50%</span>
+                </div>
+
+                <div class="config-section">
+                    <label data-i18n="settings.sfxVolume">Volume de Efeitos</label>
+                    <input type="range" id="sfx-volume" min="0" max="100" value="70" 
+                           oninput="AudioManager.setSfxVolume(this.value)">
+                    <span id="sfx-value">70%</span>
+                </div>
+
+                <div class="config-section">
+                    <label data-i18n="settings.textSpeed">Velocidade do Texto</label>
+                    <select id="text-speed" onchange="game.setTextSpeed(this.value)">
+                        <option value="30" data-i18n="settings.textSpeedSlow">Lento</option>
+                        <option value="15" selected data-i18n="settings.textSpeedNormal">Normal</option>
+                        <option value="5" data-i18n="settings.textSpeedFast">Rápido</option>
+                        <option value="0" data-i18n="settings.textSpeedInstant">Instantâneo</option>
+                    </select>
+                </div>
+
+                <div class="config-section">
+                    <label>
+                        <input type="checkbox" id="auto-save" checked> 
+                        <span data-i18n="settings.autoSave">Auto-Save</span>
+                    </label>
+                </div>
+
+                <div class="config-section">
+                    <label data-i18n="settings.language">Idioma</label>
+                    <select id="language-select" onchange="Translations.setLanguage(this.value); UI.generateSaveSlots(); Translations.applyTranslations();">
+                        <option value="pt-BR">Português</option>
+                        <option value="en-US">English</option>
+                        <option value="es-ES">Español</option>
+                        <option value="fr-FR">Français</option>
+                        <option value="ja-JP">日本語</option>
+                        <option value="de-DE">Deutsch</option>
+                    </select>
+                </div>
+
+                <button class="back-btn" onclick="UI.goBack()" data-i18n="game.back">Voltar</button>
+            </div>
+        </div>
+
+        <!-- CRÉDITOS -->
+        <div id="credits" class="screen">
+            <div class="screen-content">
+                <h2 data-i18n="credits.title">Créditos</h2>
+                <div class="credits-text">
+                    <p><strong>"Luna Wants Me"</strong></p>
+                    <p>Uma Visual Novel de Terror Psicológico</p>
+                    <br>
+                    <p><strong data-i18n="credits.story">História & Roteiro</strong></p>
+                    <p>Você</p>
+                    <br>
+                    <p><strong data-i18n="credits.programming">Programação</strong></p>
+                    <p>JavaScript, HTML5, CSS3</p>
+                    <br>
+                    <p><strong data-i18n="credits.art">Arte & Design</strong></p>
+                    <p>A definir</p>
+                    <br>
+                    <p><strong data-i18n="credits.audio">Música & Som</strong></p>
+                    <p>A definir</p>
+                    <br>
+                    <p><em data-i18n="credits.tagline">"Algumas pessoas amam demais..."</em></p>
+                    <br>
+                    <p class="warning" data-i18n="credits.warning">⚠️ Contém temas de terror psicológico, obsessão e violência implícita.</p>
+                    <p class="warning" data-i18n="credits.ageRating">Recomendado para maiores de 16 anos.</p>
+                </div>
+                <button class="back-btn" onclick="UI.showScreen('menu')" data-i18n="game.back">Voltar</button>
+            </div>
+        </div>
+
+        <!-- SAVES -->
+        <div id="saves" class="screen">
+            <div class="screen-content">
+                <h2 data-i18n="saves.title">Saves</h2>
+                <div id="saves-list">
+                    <!-- Slots de save serão gerados por JavaScript -->
+                </div>
+                <button class="back-btn" onclick="UI.goBack()" data-i18n="game.back">Voltar</button>
+            </div>
+        </div>
+
+        <!-- TELA DE FINAL -->
+        <div id="ending" class="screen">
+            <div class="screen-content">
+                <h2 id="ending-title" data-i18n="ending.title"></h2>
+                <div id="ending-text"></div>
+                <div class="ending-stats">
+                    <p><span data-i18n="ending.finalSanity">Sanidade Final</span>: <span id="final-sanity"></span>%</p>
+                    <p><span data-i18n="ending.choices">Escolhas Feitas</span>: <span id="total-choices"></span></p>
+                </div>
+                <button onclick="UI.goToMenu()" data-i18n="ending.mainMenu">Menu Principal</button>
+                <button onclick="UI.replayGame()" data-i18n="ending.playAgain">Jogar Novamente</button>
+            </div>
+        </div>
+
+        <!-- TELA DE CRÉDITOS FINAIS -->
+        <div id="credits-screen" class="screen">
+            <div id="credits-container">
+                <!-- Créditos serão gerados por JavaScript -->
+            </div>
+            <button id="credits-skip-btn" onclick="UI.skipCredits()">Pular Créditos (ESC)</button>
+        </div>
+
+    </div>
+
+    <!-- SCRIPTS -->
+    <script src="js/translations.js"></script>
+    <script src="js/dialogues.js"></script>
+    <script src="js/audio.js"></script>
+    <script src="js/save-system.js"></script>
+    <script src="js/story.js"></script>
+    <script src="js/ui.js"></script>
+    <script src="js/game.js"></script>
+
+</body>
+</html>

@@ -1,0 +1,667 @@
+ 
+/* ==================== LUNA WANTS ME - DESIGN RESPONSIVO ==================== */
+
+/* ==================== TABLETS E DISPOSITIVOS MÉDIOS ==================== */
+@media (max-width: 1024px) {
+    
+    /* Menu Principal */
+    .game-title {
+        font-size: 4em;
+    }
+    
+    .subtitle {
+        font-size: 1.3em;
+    }
+    
+    .menu-btn {
+        min-width: 250px;
+        padding: 15px 50px;
+        font-size: 1.1em;
+    }
+    
+    /* Jogo */
+    #character-container {
+        max-width: 400px;
+        bottom: 130px;
+    }
+    
+    #dialog-box {
+        width: 92%;
+        padding: 25px;
+        bottom: 20px;
+    }
+    
+    #name-box {
+        font-size: 1.4em;
+    }
+    
+    #text-box {
+        font-size: 1.1em;
+        min-height: 70px;
+    }
+    
+    .choice-btn {
+        font-size: 1.1em;
+        padding: 18px;
+    }
+    
+    /* Sanidade */
+    #sanity-bar {
+        width: 220px;
+        top: 20px;
+        right: 20px;
+    }
+    
+    .sanity-label {
+        font-size: 1em;
+    }
+    
+    /* Telas secundárias */
+    .screen-content {
+        padding: 50px 30px;
+        max-width: 700px;
+    }
+    
+    .screen-content h2 {
+        font-size: 2.5em;
+    }
+    
+    .config-section {
+        padding: 18px;
+    }
+    
+    /* Menu de pausa */
+    .overlay-content {
+        min-width: 350px;
+        padding: 35px;
+    }
+    
+    .overlay-content h2 {
+        font-size: 2.2em;
+    }
+}
+
+/* ==================== SMARTPHONES E DISPOSITIVOS PEQUENOS ==================== */
+@media (max-width: 768px) {
+    
+    /* Menu Principal */
+    .game-title {
+        font-size: 3em;
+        margin-bottom: 15px;
+    }
+    
+    .subtitle {
+        font-size: 1.1em;
+        margin-bottom: 35px;
+    }
+    
+    .menu-buttons {
+        gap: 12px;
+    }
+    
+    .menu-btn {
+        min-width: 200px;
+        padding: 12px 40px;
+        font-size: 1em;
+        letter-spacing: 2px;
+    }
+    
+    /* Jogo */
+    #character-container {
+        max-width: 300px;
+        bottom: 110px;
+        max-height: 50vh;
+    }
+    
+    #dialog-box {
+        width: 95%;
+        padding: 20px;
+        bottom: 15px;
+        border-width: 2px;
+    }
+    
+    #name-box {
+        font-size: 1.2em;
+        margin-bottom: 12px;
+    }
+    
+    #text-box {
+        font-size: 1em;
+        min-height: 60px;
+        line-height: 1.6;
+    }
+    
+    .choice-btn {
+        font-size: 1em;
+        padding: 15px;
+        border-left-width: 3px;
+    }
+    
+    .choice-btn:hover {
+        transform: translateX(5px);
+        border-left-width: 6px;
+    }
+    
+    #click-hint {
+        font-size: 0.9em;
+        bottom: 140px;
+        right: 20px;
+    }
+    
+    /* Sanidade */
+    #sanity-bar {
+        width: 180px;
+        top: 15px;
+        right: 15px;
+    }
+    
+    .sanity-label {
+        font-size: 0.9em;
+        margin-bottom: 6px;
+    }
+    
+    .sanity-container {
+        height: 20px;
+    }
+    
+    /* Botão de pausa */
+    #pause-btn {
+        width: 45px;
+        height: 45px;
+        font-size: 1.3em;
+        top: 15px;
+        left: 15px;
+    }
+    
+    /* Telas secundárias */
+    .screen-content {
+        padding: 40px 20px;
+        max-width: 100%;
+    }
+    
+    .screen-content h2 {
+        font-size: 2em;
+        margin-bottom: 30px;
+    }
+    
+    /* Configurações */
+    .config-section {
+        margin: 25px 0;
+        padding: 15px;
+    }
+    
+    .config-section label {
+        font-size: 1.1em;
+        margin-bottom: 12px;
+    }
+    
+    .config-section select {
+        font-size: 1em;
+        padding: 10px;
+    }
+    
+    /* Menu de pausa */
+    .overlay-content {
+        min-width: 280px;
+        padding: 30px 25px;
+    }
+    
+    .overlay-content h2 {
+        font-size: 2em;
+        margin-bottom: 25px;
+    }
+    
+    .overlay-content button {
+        font-size: 1em;
+        padding: 12px;
+        margin: 8px 0;
+        letter-spacing: 1px;
+    }
+    
+    /* Créditos */
+    .credits-text {
+        font-size: 1em;
+        line-height: 1.8;
+    }
+    
+    /* Saves */
+    .save-slot {
+        flex-direction: column;
+        align-items: flex-start;
+        padding: 15px;
+        gap: 15px;
+    }
+    
+    .save-actions {
+        width: 100%;
+        justify-content: space-between;
+    }
+    
+    .save-actions button {
+        flex: 1;
+        padding: 10px 15px;
+        font-size: 0.9em;
+    }
+    
+    /* Tela de final */
+    #ending-title {
+        font-size: 2.5em;
+        margin-bottom: 25px;
+    }
+    
+    #ending-text {
+        font-size: 1.1em;
+        line-height: 1.8;
+        margin-bottom: 30px;
+    }
+    
+    .ending-stats {
+        padding: 20px;
+        margin: 25px 0;
+    }
+    
+    .ending-stats p {
+        font-size: 1.1em;
+        margin: 8px 0;
+    }
+    
+    #ending button {
+        width: 100%;
+        margin: 8px 0;
+        padding: 12px 30px;
+        font-size: 1em;
+    }
+}
+
+/* ==================== SMARTPHONES MUITO PEQUENOS ==================== */
+@media (max-width: 480px) {
+    
+    /* Menu Principal */
+    .game-title {
+        font-size: 2.5em;
+        letter-spacing: 3px;
+    }
+    
+    .subtitle {
+        font-size: 1em;
+        margin-bottom: 30px;
+        letter-spacing: 1px;
+    }
+    
+    .menu-btn {
+        min-width: 180px;
+        padding: 10px 30px;
+        font-size: 0.95em;
+        letter-spacing: 1px;
+    }
+    
+    /* Jogo */
+    #character-container {
+        max-width: 250px;
+        bottom: 100px;
+        max-height: 45vh;
+    }
+    
+    #dialog-box {
+        width: 98%;
+        padding: 15px;
+        bottom: 10px;
+        border-radius: 10px;
+    }
+    
+    #name-box {
+        font-size: 1.1em;
+        margin-bottom: 10px;
+    }
+    
+    #text-box {
+        font-size: 0.95em;
+        min-height: 50px;
+        line-height: 1.5;
+    }
+    
+    .choice-btn {
+        font-size: 0.95em;
+        padding: 12px;
+        border-left-width: 3px;
+    }
+    
+    #click-hint {
+        font-size: 0.8em;
+        bottom: 120px;
+        right: 15px;
+    }
+    
+    /* Sanidade */
+    #sanity-bar {
+        width: 150px;
+        top: 12px;
+        right: 12px;
+    }
+    
+    .sanity-label {
+        font-size: 0.85em;
+        margin-bottom: 5px;
+    }
+    
+    .sanity-container {
+        height: 18px;
+    }
+    
+    /* Botão de pausa */
+    #pause-btn {
+        width: 40px;
+        height: 40px;
+        font-size: 1.2em;
+        top: 12px;
+        left: 12px;
+    }
+    
+    /* Telas secundárias */
+    .screen-content {
+        padding: 30px 15px;
+    }
+    
+    .screen-content h2 {
+        font-size: 1.8em;
+        margin-bottom: 25px;
+    }
+    
+    /* Configurações */
+    .config-section {
+        margin: 20px 0;
+        padding: 12px;
+    }
+    
+    .config-section label {
+        font-size: 1em;
+        margin-bottom: 10px;
+    }
+    
+    .config-section select {
+        font-size: 0.95em;
+        padding: 8px;
+    }
+    
+    .config-section span {
+        font-size: 1em;
+    }
+    
+    .back-btn {
+        padding: 12px 40px;
+        font-size: 1.1em;
+    }
+    
+    /* Menu de pausa */
+    .overlay-content {
+        min-width: 260px;
+        padding: 25px 20px;
+    }
+    
+    .overlay-content h2 {
+        font-size: 1.8em;
+        margin-bottom: 20px;
+    }
+    
+    .overlay-content button {
+        font-size: 0.95em;
+        padding: 10px;
+        margin: 6px 0;
+    }
+    
+    /* Créditos */
+    .credits-text {
+        font-size: 0.95em;
+        line-height: 1.7;
+    }
+    
+    .credits-text strong {
+        font-size: 1.1em;
+    }
+    
+    /* Saves */
+    #saves-list {
+        gap: 12px;
+    }
+    
+    .save-slot {
+        padding: 12px;
+    }
+    
+    .save-info h3 {
+        font-size: 1em;
+    }
+    
+    .save-info p {
+        font-size: 0.85em;
+    }
+    
+    .save-actions button {
+        padding: 8px 12px;
+        font-size: 0.85em;
+    }
+    
+    /* Tela de final */
+    #ending-title {
+        font-size: 2em;
+        margin-bottom: 20px;
+    }
+    
+    #ending-text {
+        font-size: 1em;
+        line-height: 1.7;
+        margin-bottom: 25px;
+    }
+    
+    .ending-stats {
+        padding: 15px;
+        margin: 20px 0;
+    }
+    
+    .ending-stats p {
+        font-size: 1em;
+        margin: 6px 0;
+    }
+    
+    #ending button {
+        padding: 10px 25px;
+        font-size: 0.95em;
+    }
+}
+
+/* ==================== LANDSCAPE (PAISAGEM) EM MOBILE ==================== */
+@media (max-height: 500px) and (orientation: landscape) {
+    
+    #character-container {
+        max-height: 50vh;
+        bottom: 80px;
+    }
+    
+    #dialog-box {
+        bottom: 8px;
+        padding: 12px 20px;
+    }
+    
+    #name-box {
+        font-size: 1em;
+        margin-bottom: 8px;
+    }
+    
+    #text-box {
+        font-size: 0.9em;
+        min-height: 40px;
+        line-height: 1.4;
+    }
+    
+    .choice-btn {
+        padding: 10px;
+        font-size: 0.9em;
+    }
+    
+    #sanity-bar {
+        width: 120px;
+        top: 10px;
+        right: 10px;
+    }
+    
+    .sanity-label {
+        font-size: 0.8em;
+        margin-bottom: 4px;
+    }
+    
+    .sanity-container {
+        height: 15px;
+    }
+    
+    #pause-btn {
+        width: 35px;
+        height: 35px;
+        font-size: 1em;
+        top: 10px;
+        left: 10px;
+    }
+    
+    #click-hint {
+        font-size: 0.75em;
+        bottom: 90px;
+    }
+    
+    .screen-content {
+        padding: 20px 15px;
+        overflow-y: auto;
+    }
+    
+    .overlay-content {
+        padding: 20px;
+        max-height: 90vh;
+        overflow-y: auto;
+    }
+}
+
+/* ==================== TELAS MUITO GRANDES (4K+) ==================== */
+@media (min-width: 1920px) {
+    
+    .game-title {
+        font-size: 6em;
+    }
+    
+    .subtitle {
+        font-size: 1.8em;
+    }
+    
+    .menu-btn {
+        min-width: 400px;
+        padding: 20px 70px;
+        font-size: 1.5em;
+    }
+    
+    #character-container {
+        max-width: 600px;
+        bottom: 180px;
+    }
+    
+    #dialog-box {
+        max-width: 1200px;
+        padding: 35px;
+        bottom: 40px;
+    }
+    
+    #name-box {
+        font-size: 1.8em;
+    }
+    
+    #text-box {
+        font-size: 1.5em;
+        min-height: 100px;
+    }
+    
+    .choice-btn {
+        font-size: 1.4em;
+        padding: 25px;
+    }
+    
+    #sanity-bar {
+        width: 300px;
+        top: 40px;
+        right: 40px;
+    }
+    
+    .sanity-label {
+        font-size: 1.3em;
+    }
+    
+    .sanity-container {
+        height: 30px;
+    }
+    
+    #pause-btn {
+        width: 60px;
+        height: 60px;
+        font-size: 1.8em;
+        top: 40px;
+        left: 40px;
+    }
+    
+    .screen-content h2 {
+        font-size: 3.5em;
+    }
+    
+    .config-section label {
+        font-size: 1.5em;
+    }
+    
+    .overlay-content {
+        min-width: 500px;
+        padding: 50px;
+    }
+}
+
+/* ==================== MODO ESCURO FORÇADO ==================== */
+@media (prefers-color-scheme: dark) {
+    /* Já está em modo escuro por padrão */
+}
+
+/* ==================== REDUÇÃO DE MOVIMENTO ==================== */
+@media (prefers-reduced-motion: reduce) {
+    
+    * {
+        animation-duration: 0.01s !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01s !important;
+    }
+    
+    .animate-glitch,
+    .animate-shake,
+    .animate-flicker {
+        animation: none !important;
+    }
+    
+    #game.glitch-mode #scene-background,
+    #game.glitch-mode #portrait {
+        animation: none !important;
+    }
+}
+
+/* ==================== IMPRESSÃO (se necessário) ==================== */
+@media print {
+    
+    body {
+        background: white;
+        color: black;
+    }
+    
+    .menu-background,
+    #vignette,
+    #sanity-bar,
+    #pause-btn,
+    #click-hint,
+    .overlay-menu {
+        display: none !important;
+    }
+    
+    #dialog-box {
+        border: 2px solid black;
+        background: white;
+        color: black;
+    }
+}

@@ -1,0 +1,663 @@
+/* ==================== LUNA WANTS ME - UI.JS ==================== */
+/* Gerenciamento da Interface do Usuário */
+
+class UI {
+    static init() {
+        console.log('🎨 Inicializando UI...');
+        this.currentTypingText = '';
+        this.typingInterval = null;
+        this.currentScreen = 'menu';
+        this.previousScreen = 'menu';
+        this.currentEndingData = null;
+        this.currentGameState = null;
+        this.creditsTimeout = null;
+        
+        // Gerar slots de save
+        this.generateSaveSlots();
+        
+        console.log('✅ UI inicializada!');
+    }
+    
+    /* ==================== NAVEGAÇÃO DE TELAS ==================== */
+    
+    static showScreen(screenName) {
+        console.log(`📺 Mostrando tela: ${screenName}`);
+        
+        // Esconder todas as telas
+        const allScreens = document.querySelectorAll('.screen');
+        console.log(`🔍 Total de telas encontradas: ${allScreens.length}`);
+        allScreens.forEach(screen => {
+            screen.classList.remove('active');
+        });
+        
+        // Salvar tela anterior
+        this.previousScreen = this.currentScreen;
+        this.currentScreen = screenName;
+        
+        // Mostrar tela selecionada
+        const screen = document.getElementById(screenName);
+        console.log(`🔍 Tela #${screenName} encontrada:`, !!screen);
+        if (screen) {
+            screen.classList.add('active');
+            console.log(`✅ Classe 'active' adicionada a #${screenName}`);
+            
+            // Atualizar música baseado na tela
+            if (screenName === 'menu') {
+                AudioManager.playMusic('menu');
+            } else if (screenName === 'game') {
+                AudioManager.playMusic('normal');
+            }
+        } else {
+            console.error(`❌ Tela não encontrada: ${screenName}`);
+        }
+    }
+    
+    static goBack() {
+        this.showScreen(this.previousScreen);
+    }
+    
+    /* ==================== DIÁLOGO ==================== */
+    
+    static showDialogue(name, text, speed = 15) {
+        console.log(`💬 showDialogue() chamado - Nome: ${name}, Velocidade: ${speed}`);
+        const nameBox = document.getElementById('name-box');
+        const textBox = document.getElementById('text-box');
+        const choicesBox = document.getElementById('choices-box');
+        const dialogBox = document.getElementById('dialog-box');
+        
+        console.log(`🔍 Elementos encontrados - nameBox:`, !!nameBox, `textBox:`, !!textBox, `dialogBox:`, !!dialogBox);
+        console.log(`📦 dialog-box display:`, dialogBox?.style.display, `computed:`, window.getComputedStyle(dialogBox).display);
+        
+        // Limpar escolhas anteriores
+        choicesBox.innerHTML = '';
+        
+        // Atualizar nome
+        nameBox.textContent = name || '';
+        console.log(`✅ Nome atualizado: ${name}`);
+        
+        // Efeito de digitação
+        console.log(`⏱️ Iniciando digitação com velocidade ${speed}ms`);
+        this.typeText(textBox, text, speed);
+        
+        // SFX de texto
+        if (speed > 0) {
+            AudioManager.playSFX('text');
+        }
+    }
+    
+    static typeText(element, text, speed) {
+        console.log(`🔤 typeText() - elemento:`, !!element, `texto: "${text.substring(0, 30)}...", speed: ${speed}`);
+        
+        // Parar digitação anterior
+        if (this.typingInterval) {
+            clearInterval(this.typingInterval);
+        }
+        
+        element.textContent = '';
+        this.currentTypingText = text;
+        
+        // Se velocidade for 0, mostrar instantaneamente
+        if (speed === 0) {
+            console.log(`⚡ Mostrando texto instantaneamente`);
+            element.textContent = text;
+            game.state.typing = false;
+            return;
+        }
+        
+        let index = 0;
+        game.state.typing = true;
+        console.log(`✏️ Iniciando interval para digitação, velocidade: ${speed}ms`);
+        
+        this.typingInterval = setInterval(() => {
+            if (index < text.length) {
+                element.textContent += text[index];
+                index++;
+            } else {
+                console.log(`✅ Digitação concluída`);
+                clearInterval(this.typingInterval);
+                this.typingInterval = null;
+                game.state.typing = false;
+            }
+        }, speed);
+        
+        console.log(`✏️ Interval criado com ID: ${this.typingInterval}`);
+    }
+    
+    static completeText() {
+        console.log('⚡ completeText() - interval:', !!this.typingInterval, 'currentText:', this.currentTypingText?.substring(0, 30));
+        if (this.typingInterval) {
+            clearInterval(this.typingInterval);
+            this.typingInterval = null;
+            
+            const textBox = document.getElementById('text-box');
+            textBox.textContent = this.currentTypingText;
+            game.state.typing = false;
+            console.log('✅ Texto completado instantaneamente');
+        }
+    }
+    
+    /* ==================== ESCOLHAS ==================== */
+    
+    static showChoices(options) {
+        const choicesBox = document.getElementById('choices-box');
+        const textBox = document.getElementById('text-box');
+        
+        // Limpar texto e escolhas anteriores
+        textBox.textContent = '';
+        choicesBox.innerHTML = '';
+        
+        // Criar botões de escolha
+        options.forEach((option, index) => {
+            const button = document.createElement('button');
+            button.className = 'choice-btn';
+            // Traduzir texto da opção
+            button.textContent = Translations.getDialogue(option.text) || option.text;
+            button.onclick = () => {
+                AudioManager.playSFX('click');
+                game.makeChoice(index);
+            };
+            
+            choicesBox.appendChild(button);
+        });
+    }
+    
+    /* ==================== PERSONAGENS ==================== */
+    
+    static showPortrait(character, expression) {
+        const portrait = document.getElementById('portrait');
+        const portraitPath = CHARACTERS[character]?.portraits[expression];
+        
+        if (portraitPath) {
+            portrait.src = portraitPath;
+            portrait.style.display = 'block';
+            portrait.classList.add('animate-fade-in');
+        } else {
+            console.warn(`⚠️ Portrait não encontrado: ${character} - ${expression}`);
+            // Fallback: mostrar placeholder colorido
+            portrait.style.display = 'block';
+            portrait.alt = `${character} - ${expression}`;
+        }
+    }
+    
+    static hidePortrait() {
+        const portrait = document.getElementById('portrait');
+        portrait.style.display = 'none';
+    }
+    
+    /* ==================== BACKGROUNDS ==================== */
+    
+    static setBackground(backgroundName) {
+        console.log(`🖼️ Definindo background: ${backgroundName}`);
+        const sceneBackground = document.getElementById('scene-background');
+        const backgroundPath = BACKGROUNDS[backgroundName];
+        console.log(`📍 Caminho do background: ${backgroundPath}`);
+        
+        if (backgroundPath) {
+            sceneBackground.style.backgroundImage = `url('${backgroundPath}')`;
+            console.log(`✅ Background aplicado: ${backgroundPath}`);
+        } else {
+            console.warn(`⚠️ Background não encontrado: ${backgroundName}`);
+            // Fallback: cor sólida baseada no nome
+            const colors = {
+                rua: '#4a5568',
+                sala_aula: '#f7fafc',
+                casa_luna: '#2d3748',
+                porao: '#1a202c'
+            };
+            sceneBackground.style.backgroundColor = colors[backgroundName] || '#000';
+            sceneBackground.style.backgroundImage = 'none';
+        }
+    }
+    
+    /* ==================== SANIDADE ==================== */
+    
+    static updateSanity(value) {
+        const sanityValue = document.getElementById('sanity-value');
+        const sanityFill = document.getElementById('sanity-fill');
+        
+        // Atualizar valor
+        sanityValue.textContent = Math.round(value);
+        
+        // Atualizar barra
+        sanityFill.style.width = `${value}%`;
+        
+        // Remover classes anteriores
+        sanityFill.classList.remove('low', 'critical');
+        
+        // Adicionar classe baseada no valor
+        if (value <= 20) {
+            sanityFill.classList.add('critical');
+        } else if (value <= 40) {
+            sanityFill.classList.add('low');
+        }
+        
+        // Animação de redução
+        if (value < 50) {
+            sanityFill.style.transition = 'width 0.5s ease, background 0.5s ease';
+        }
+    }
+    
+    /* ==================== EFEITOS VISUAIS ==================== */
+    
+    static applyVisualEffect(effect) {
+        const gameElement = document.getElementById('game');
+        const vignette = document.getElementById('vignette');
+        
+        switch(effect) {
+            case 'glitch':
+                gameElement.classList.add('glitch-mode');
+                setTimeout(() => {
+                    gameElement.classList.remove('glitch-mode');
+                }, 500);
+                break;
+                
+            case 'shake':
+                gameElement.style.animation = 'shake 0.5s ease';
+                setTimeout(() => {
+                    gameElement.style.animation = '';
+                }, 500);
+                break;
+                
+            case 'vignette':
+                vignette.classList.add('active');
+                break;
+                
+            case 'dark':
+                vignette.classList.add('active');
+                vignette.style.background = 'radial-gradient(circle at center, transparent 20%, rgba(0,0,0,0.9) 80%)';
+                break;
+                
+            default:
+                console.warn(`⚠️ Efeito visual desconhecido: ${effect}`);
+        }
+    }
+    
+    /* ==================== DICA DE CLIQUE ==================== */
+    
+    static showClickHint() {
+        const hint = document.getElementById('click-hint');
+        hint.classList.remove('hidden');
+    }
+    
+    static hideClickHint() {
+        const hint = document.getElementById('click-hint');
+        hint.classList.add('hidden');
+    }
+    
+    /* ==================== MENU DE PAUSA ==================== */
+    
+    static togglePause() {
+        const pauseMenu = document.getElementById('pause-menu');
+        
+        if (pauseMenu.style.display === 'none' || !pauseMenu.style.display) {
+            pauseMenu.style.display = 'flex';
+            AudioManager.pauseMusic();
+        } else {
+            pauseMenu.style.display = 'none';
+            AudioManager.resumeMusic();
+        }
+    }
+    
+    static confirmQuit() {
+        if (confirm('Tem certeza que deseja voltar ao menu? O progresso não salvo será perdido.')) {
+            this.togglePause();
+            game.stopPlayTime();
+            this.showScreen('menu');
+        }
+    }
+    
+    /* ==================== SISTEMA DE SAVES ==================== */
+    
+    static generateSaveSlots() {
+        const savesList = document.getElementById('saves-list');
+        if (!savesList) return;
+        
+        savesList.innerHTML = '';
+        
+        for (let i = 1; i <= 5; i++) {
+            const saveData = SaveSystem.load(i);
+            const slot = this.createSaveSlot(i, saveData);
+            savesList.appendChild(slot);
+        }
+    }
+    
+    static createSaveSlot(slotNumber, saveData) {
+        const slot = document.createElement('div');
+        slot.className = saveData ? 'save-slot' : 'save-slot empty';
+        
+        const info = document.createElement('div');
+        info.className = 'save-info';
+        
+        if (saveData) {
+            const title = document.createElement('h3');
+            title.textContent = `${Translations.get('saves.save')} ${slotNumber}`;
+            
+            const scene = document.createElement('p');
+            scene.textContent = `${Translations.get('saves.scene')}: ${saveData.state.currentScene}`;
+            
+            const sanity = document.createElement('p');
+            sanity.textContent = `${Translations.get('saves.sanity')}: ${Math.round(saveData.state.sanity)}%`;
+            
+            const date = document.createElement('p');
+            date.textContent = `${Translations.get('saves.date')}: ${new Date(saveData.timestamp).toLocaleString()}`;
+            
+            info.appendChild(title);
+            info.appendChild(scene);
+            info.appendChild(sanity);
+            info.appendChild(date);
+        } else {
+            const title = document.createElement('h3');
+            title.textContent = `${Translations.get('saves.save')} ${slotNumber}`;
+            
+            const empty = document.createElement('p');
+            empty.textContent = Translations.get('saves.empty');
+            
+            info.appendChild(title);
+            info.appendChild(empty);
+        }
+        
+        const actions = document.createElement('div');
+        actions.className = 'save-actions';
+        
+        if (saveData) {
+            const loadBtn = document.createElement('button');
+            loadBtn.textContent = Translations.get('saves.load');
+            loadBtn.onclick = () => {
+                game.loadGame(slotNumber);
+                AudioManager.playSFX('click');
+            };
+            
+            const deleteBtn = document.createElement('button');
+            deleteBtn.textContent = Translations.get('saves.delete');
+            deleteBtn.className = 'delete-btn';
+            deleteBtn.onclick = () => {
+                if (confirm(Translations.get('saves.deleteConfirm') || 'Tem certeza que deseja deletar este save?')) {
+                    SaveSystem.deleteSave(slotNumber);
+                    this.generateSaveSlots();
+                    AudioManager.playSFX('click');
+                }
+            };
+            
+            actions.appendChild(loadBtn);
+            actions.appendChild(deleteBtn);
+        } else {
+            const saveBtn = document.createElement('button');
+            saveBtn.textContent = Translations.get('saves.saveHere') || 'Salvar Aqui';
+            saveBtn.onclick = () => {
+                if (game.state.currentScene !== 'cap1_inicio') {
+                    game.saveGame(slotNumber);
+                    this.generateSaveSlots();
+                    AudioManager.playSFX('click');
+                    alert(Translations.get('saves.savedSuccess') || 'Jogo salvo com sucesso!');
+                } else {
+                    alert(Translations.get('saves.startGameFirst') || 'Inicie um jogo antes de salvar!');
+                }
+            };
+            
+            actions.appendChild(saveBtn);
+        }
+        
+        slot.appendChild(info);
+        slot.appendChild(actions);
+        
+        return slot;
+    }
+    
+    /* ==================== TELA DE FINAL ==================== */
+    
+    static showEnding(endingData, gameState) {
+        console.log(`🎬 Mostrando final: ${endingData.title}`);
+        
+        // Limpar timeout dos créditos se ainda estiver ativo
+        if (this.creditsTimeout) {
+            clearTimeout(this.creditsTimeout);
+            this.creditsTimeout = null;
+        }
+        
+        // Remover listener de teclado dos créditos
+        if (this.creditsKeyListener) {
+            document.removeEventListener('keydown', this.creditsKeyListener);
+            this.creditsKeyListener = null;
+        }
+        
+        // Mostrar tela de final
+        this.showScreen('ending');
+        
+        // Preencher informações
+        document.getElementById('ending-title').textContent = endingData.title;
+        document.getElementById('ending-text').textContent = endingData.text;
+        document.getElementById('final-sanity').textContent = Math.round(gameState.sanity);
+        document.getElementById('total-choices').textContent = gameState.stats.choicesMade;
+        
+        // Aplicar efeitos especiais baseados no final
+        if (endingData.id.includes('bad')) {
+            document.getElementById('ending-title').style.color = '#ff0000';
+        } else if (endingData.id.includes('good')) {
+            document.getElementById('ending-title').style.color = '#00ff88';
+        } else if (endingData.id.includes('secret')) {
+            document.getElementById('ending-title').style.color = '#ff00ff';
+            document.getElementById('ending').style.animation = 'glitch 0.5s infinite';
+        }
+    }
+    
+    /* ==================== CONFIGURAÇÕES ==================== */
+    
+    static updateConfigUI() {
+        // Atualizar sliders e valores
+        const musicVolume = document.getElementById('music-volume');
+        const sfxVolume = document.getElementById('sfx-volume');
+        const textSpeed = document.getElementById('text-speed');
+        
+        if (musicVolume) {
+            musicVolume.value = game.config.musicVolume;
+            document.getElementById('music-value').textContent = `${game.config.musicVolume}%`;
+        }
+        
+        if (sfxVolume) {
+            sfxVolume.value = game.config.sfxVolume;
+            document.getElementById('sfx-value').textContent = `${game.config.sfxVolume}%`;
+        }
+        
+        if (textSpeed) {
+            textSpeed.value = game.config.textSpeed;
+        }
+    }
+    
+    /* ==================== TELA DE CRÉDITOS ==================== */
+    
+    static showCredits(endingData) {
+        console.log('🎬 Mostrando créditos finais...');
+        
+        // Limpar créditos anteriores
+        const container = document.getElementById('credits-container');
+        container.innerHTML = '';
+        
+        // Créditos da estrutura base
+        const credits = [
+            {
+                title: 'LUNA WANTS ME',
+                items: [
+                    { role: 'Conceito & História', name: 'Você' }
+                ]
+            },
+            {
+                title: 'Programação',
+                items: [
+                    { role: 'JavaScript', name: 'HTML5, CSS3, Vanilla JS' },
+                    { role: 'Game Engine', name: 'Construído do zero' }
+                ]
+            },
+            {
+                title: 'Arte & Design',
+                items: [
+                    { role: 'UI/UX Design', name: 'Visual Novel UI' },
+                    { role: 'Animações', name: 'CSS Animations' }
+                ]
+            },
+            {
+                title: 'Música & Som',
+                items: [
+                    { role: 'Sound Design', name: 'Atmosfera Psicológica' },
+                    { role: 'Efeitos Sonoros', name: 'Imersão' }
+                ]
+            },
+            {
+                title: 'Sistema de Jogo',
+                items: [
+                    { role: 'Save System', name: 'LocalStorage' },
+                    { role: 'UI System', name: 'Sistema de Telas' },
+                    { role: 'Sanity System', name: 'Mecânica Psicológica' }
+                ]
+            }
+        ];
+        
+        // Criar seções de créditos
+        credits.forEach((section, index) => {
+            const sectionDiv = document.createElement('div');
+            sectionDiv.className = 'credits-section';
+            
+            const titleDiv = document.createElement('div');
+            titleDiv.className = 'credits-title';
+            titleDiv.textContent = section.title;
+            sectionDiv.appendChild(titleDiv);
+            
+            section.items.forEach(item => {
+                const roleDiv = document.createElement('div');
+                roleDiv.className = 'credits-role';
+                roleDiv.textContent = item.role;
+                sectionDiv.appendChild(roleDiv);
+                
+                const nameDiv = document.createElement('div');
+                nameDiv.className = 'credits-name';
+                nameDiv.textContent = item.name;
+                sectionDiv.appendChild(nameDiv);
+            });
+            
+            container.appendChild(sectionDiv);
+        });
+        
+        // Seção final
+        const finalSection = document.createElement('div');
+        finalSection.className = 'credits-section credits-final';
+        
+        const finalText1 = document.createElement('div');
+        finalText1.className = 'credits-final-text';
+        finalText1.textContent = '"Algumas pessoas amam demais..."';
+        finalSection.appendChild(finalText1);
+        
+        const finalText2 = document.createElement('div');
+        finalText2.className = 'credits-final-text';
+        finalText2.textContent = `Final: ${endingData.title}`;
+        finalSection.appendChild(finalText2);
+        
+        const endDiv = document.createElement('div');
+        endDiv.className = 'credits-end';
+        endDiv.textContent = 'FIM';
+        finalSection.appendChild(endDiv);
+        
+        container.appendChild(finalSection);
+        
+        console.log(`✅ Créditos gerados! Total de seções: ${container.children.length}`);
+        console.log('📋 Container HTML:', container.innerHTML.substring(0, 200));
+        
+        // Mostrar tela de créditos
+        this.showScreen('credits-screen');
+        
+        // Tocar música de créditos
+        AudioManager.playMusic('final');
+        
+        // Mostrar tela final automaticamente após 240 segundos (duração da animação)
+        this.creditsTimeout = setTimeout(() => {
+            this.showEndingAfterCredits();
+        }, 240000);
+        
+        // Pular com ESC
+        setTimeout(() => {
+            document.addEventListener('keydown', this.creditsKeyListener = (e) => {
+                if (e.key === 'Escape') {
+                    this.skipCredits();
+                }
+            });
+        }, 500);
+    }
+    
+    static skipCredits() {
+        console.log('⏭️ Pulando créditos...');
+        
+        // Limpar timeout
+        if (this.creditsTimeout) {
+            clearTimeout(this.creditsTimeout);
+            this.creditsTimeout = null;
+        }
+        
+        // Remover listener
+        if (this.creditsKeyListener) {
+            document.removeEventListener('keydown', this.creditsKeyListener);
+        }
+        
+        // Mostrar tela final
+        this.showEndingAfterCredits();
+    }
+    
+    static showEndingAfterCredits() {
+        console.log('🎬 Mostrando ending após créditos...');
+        if (this.currentEndingData && this.currentGameState) {
+            this.showEnding(this.currentEndingData, this.currentGameState);
+        } else {
+            console.warn('⚠️ Dados de ending não encontrados!');
+            this.showScreen('menu');
+        }
+    }
+    
+    static cleanupCredits() {
+        console.log('🧹 Limpando créditos...');
+        
+        // Limpar timeout dos créditos
+        if (this.creditsTimeout) {
+            clearTimeout(this.creditsTimeout);
+            this.creditsTimeout = null;
+        }
+        
+        // Remover listener de teclado
+        if (this.creditsKeyListener) {
+            document.removeEventListener('keydown', this.creditsKeyListener);
+            this.creditsKeyListener = null;
+        }
+        
+        // Limpar dados de ending
+        this.currentEndingData = null;
+        this.currentGameState = null;
+    }
+    
+    static goToMenu() {
+        console.log('🔙 Voltando para menu...');
+        this.cleanupCredits();
+        this.showScreen('menu');
+    }
+    
+    static replayGame() {
+        console.log('🔄 Começando novo jogo...');
+        this.cleanupCredits();
+        game.newGame();
+    }
+}
+
+/* ==================== EVENT LISTENERS PARA CONFIGURAÇÕES ==================== */
+
+// Atualizar valores dos sliders em tempo real
+document.addEventListener('DOMContentLoaded', () => {
+    const musicVolume = document.getElementById('music-volume');
+    const sfxVolume = document.getElementById('sfx-volume');
+    
+    if (musicVolume) {
+        musicVolume.addEventListener('input', (e) => {
+            document.getElementById('music-value').textContent = `${e.target.value}%`;
+        });
+    }
+    
+    if (sfxVolume) {
+        sfxVolume.addEventListener('input', (e) => {
+            document.getElementById('sfx-value').textContent = `${e.target.value}%`;
+        });
+    }
+});
