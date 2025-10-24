@@ -12,6 +12,10 @@ class UI {
         this.currentGameState = null;
         this.creditsTimeout = null;
         
+        // Sistema melhorado de menu stack
+        this.menuStack = []; // Stack COMPLETO: ['game'], ['game', 'pause'], ['game', 'pause', 'saves']
+        this.pauseIsOpen = false; // Flag para saber se pause está aberto
+        
         // Gerar slots de save
         this.generateSaveSlots();
         
@@ -23,6 +27,18 @@ class UI {
     static showScreen(screenName) {
         console.log(`📺 Mostrando tela: ${screenName}`);
         
+        // Se há menu overlay aberto, ignorar showScreen
+        if (this.menuStack.length > 1 || this.pauseIsOpen) {
+            console.log('⚠️ Menu overlay aberto, ignorando showScreen');
+            return;
+        }
+        
+        // Fechar pause se houver
+        const pauseMenu = document.getElementById('pause-menu');
+        if (pauseMenu && pauseMenu.classList.contains('active')) {
+            this.togglePause();
+        }
+        
         // Esconder todas as telas
         const allScreens = document.querySelectorAll('.screen');
         console.log(`🔍 Total de telas encontradas: ${allScreens.length}`);
@@ -30,8 +46,13 @@ class UI {
             screen.classList.remove('active');
         });
         
-        // Salvar tela anterior
-        this.previousScreen = this.currentScreen;
+        // Limpar menu stack quando muda tela
+        this.menuStack = [];
+        
+        // Salvar tela anterior (apenas se for tela válida e diferente)
+        if (screenName !== this.currentScreen && this.currentScreen !== 'menu') {
+            this.previousScreen = this.currentScreen;
+        }
         this.currentScreen = screenName;
         
         // Mostrar tela selecionada
@@ -52,8 +73,175 @@ class UI {
         }
     }
     
+    // Abrir menu como overlay (em cima do pause-menu) - CORRIGIDO
+    static showMenuOverlay(menuName) {
+        console.log(`🎨 Abrindo menu overlay: ${menuName}`);
+        
+        // Proteção: não abrir se já está aberto
+        if (this.menuStack.includes(menuName)) {
+            console.log(`⚠️ Menu ${menuName} já está aberto`);
+            return;
+        }
+        
+        // Só funciona se pause-menu está aberto
+        const pauseMenu = document.getElementById('pause-menu');
+        if (!pauseMenu || !pauseMenu.classList.contains('active')) {
+            console.log('⚠️ Pause não está aberto, usando showScreen normalmente');
+            this.showScreen(menuName);
+            return;
+        }
+        
+        // Esconder conteúdo do pause-menu
+        const pauseContent = pauseMenu.querySelector('.overlay-content');
+        if (pauseContent) {
+            pauseContent.style.display = 'none';
+        }
+        
+        // Esconder tela anterior se houver (saves/config/etc)
+        if (this.menuStack.length > 1) {
+            const previousScreen = document.getElementById(this.menuStack[this.menuStack.length - 1]);
+            if (previousScreen) {
+                previousScreen.classList.remove('active');
+            }
+        }
+        
+        // Mostrar menu overlay
+        const menu = document.getElementById(menuName);
+        if (menu) {
+            menu.classList.add('active');
+            this.menuStack.push(menuName);
+            console.log(`✅ Menu overlay aberto: ${menuName}, Stack:`, this.menuStack);
+            AudioManager.playSFX('click');
+        } else {
+            console.error(`❌ Menu não encontrado: ${menuName}`);
+        }
+    }
+    
+    // CORRIGIDO: Voltar para o menu anterior na stack
     static goBack() {
-        this.showScreen(this.previousScreen);
+        console.log('🔙 Voltando...', 'Stack atual:', this.menuStack);
+        
+        if (this.menuStack.length === 0) {
+            console.log('⚠️ Stack vazia, nada para fazer');
+            return;
+        }
+        
+        // Pop do topo da stack
+        const currentScreen = this.menuStack.pop();
+        console.log(`🔙 Fechando: ${currentScreen}`);
+        
+        // Remover elemento da tela
+        if (currentScreen === 'achievements-overlay') {
+            // Remover achievement gallery
+            const gallery = document.querySelector('.achievement-gallery');
+            if (gallery) {
+                gallery.classList.remove('active');
+                setTimeout(() => {
+                    gallery.remove();
+                }, 300);
+            }
+        } else if (currentScreen === 'inventory-overlay') {
+            // Remover inventory panel
+            const inventory = document.getElementById('inventory-panel');
+            if (inventory) {
+                inventory.classList.remove('active');
+                setTimeout(() => {
+                    inventory.remove();
+                }, 300);
+            }
+        } else {
+            // Screen normal
+            const currentEl = document.getElementById(currentScreen);
+            if (currentEl) {
+                currentEl.classList.remove('active');
+            }
+        }
+        
+        // Se há items na stack depois do pop
+        if (this.menuStack.length > 0) {
+            const nextScreen = this.menuStack[this.menuStack.length - 1];
+            console.log(`🔙 Voltando para: ${nextScreen}`);
+            
+            // Se é pause, mostrar pause content
+            if (nextScreen === 'pause') {
+                const pauseMenu = document.getElementById('pause-menu');
+                const pauseContent = pauseMenu.querySelector('.overlay-content');
+                if (pauseContent) {
+                    pauseContent.style.display = 'block';
+                }
+            } else if (nextScreen !== 'achievements-overlay' && nextScreen !== 'inventory-overlay') {
+                // Mostrar próxima tela (se não for overlay especial)
+                const nextEl = document.getElementById(nextScreen);
+                if (nextEl) {
+                    nextEl.classList.add('active');
+                }
+            }
+        } else {
+            // Stack vazia - voltamos para o jogo
+            console.log('✅ Voltado para o jogo');
+        }
+    }
+    
+    // Abrir inventário como overlay - CORRIGIDO
+    static showInventoryOverlay() {
+        console.log('🎒 Abrindo inventário como overlay...');
+        
+        // Proteção: não abrir se já está aberto
+        if (this.menuStack.includes('inventory-overlay')) {
+            console.log('⚠️ Inventário já está aberto');
+            return;
+        }
+        
+        // Só funciona se pause está aberto
+        const pauseMenu = document.getElementById('pause-menu');
+        if (!pauseMenu || !pauseMenu.classList.contains('active')) {
+            console.log('⚠️ Pause não está aberto');
+            return;
+        }
+        
+        // Esconder pause content
+        const pauseContent = pauseMenu.querySelector('.overlay-content');
+        if (pauseContent) {
+            pauseContent.style.display = 'none';
+        }
+        
+        // Abrir inventário com InventorySystem
+        InventorySystem.openInventoryAsOverlay();
+        
+        // Adicionar ao stack
+        this.menuStack.push('inventory-overlay');
+        console.log('✅ Inventário overlay aberto, Stack:', this.menuStack);
+    }
+    
+    // Abrir achievements como overlay - CORRIGIDO
+    static showAchievementsOverlay() {
+        console.log('🏆 Abrindo achievements como overlay...');
+        
+        // Proteção: não abrir se já está aberto
+        if (this.menuStack.includes('achievements-overlay')) {
+            console.log('⚠️ Achievements já estão abertos');
+            return;
+        }
+        
+        // Só funciona se pause está aberto
+        const pauseMenu = document.getElementById('pause-menu');
+        if (!pauseMenu || !pauseMenu.classList.contains('active')) {
+            console.log('⚠️ Pause não está aberto');
+            return;
+        }
+        
+        // Esconder pause content
+        const pauseContent = pauseMenu.querySelector('.overlay-content');
+        if (pauseContent) {
+            pauseContent.style.display = 'none';
+        }
+        
+        // Abrir achievements com AchievementSystem
+        AchievementSystem.showGalleryAsOverlay();
+        
+        // Adicionar ao stack
+        this.menuStack.push('achievements-overlay');
+        console.log('✅ Achievements overlay aberto, Stack:', this.menuStack);
     }
     
     /* ==================== DIÁLOGO ==================== */
@@ -284,17 +472,62 @@ class UI {
         hint.classList.add('hidden');
     }
     
-    /* ==================== MENU DE PAUSA ==================== */
+    /* ==================== MENU DE PAUSA - CORRIGIDO ==================== */
     
     static togglePause() {
         const pauseMenu = document.getElementById('pause-menu');
+        const pauseOverlay = document.getElementById('pause-overlay');
         
-        if (pauseMenu.style.display === 'none' || !pauseMenu.style.display) {
-            pauseMenu.style.display = 'flex';
-            AudioManager.pauseMusic();
-        } else {
-            pauseMenu.style.display = 'none';
+        if (pauseMenu.classList.contains('active')) {
+            // Fechar pause
+            console.log('❌ Fechando pause menu');
+            pauseMenu.classList.remove('active');
+            if (pauseOverlay) pauseOverlay.classList.remove('active');
+            
+            // Limpar todo o menu stack
+            this.menuStack = [];
+            
+            // Fechar todos os overlays
+            const screens = document.querySelectorAll('.screen.active');
+            screens.forEach(screen => {
+                if (screen.id !== 'game') {
+                    screen.classList.remove('active');
+                }
+            });
+            
+            // Limpar achievement/inventory overlays
+            document.querySelectorAll('.achievement-gallery, #inventory-panel').forEach(el => {
+                el.remove();
+            });
+            
+            // Restaurar overlay-content do pause
+            const pauseContent = pauseMenu.querySelector('.overlay-content');
+            if (pauseContent) {
+                pauseContent.style.display = 'block';
+            }
+            
+            this.pauseIsOpen = false;
             AudioManager.resumeMusic();
+        } else {
+            // Abrir pause
+            console.log('✅ Abrindo pause menu');
+            pauseMenu.classList.add('active');
+            this.pauseIsOpen = true;
+            this.menuStack = ['pause']; // Iniciar stack com pause
+            
+            // Criar overlay se não existir
+            if (!pauseOverlay) {
+                const overlay = document.createElement('div');
+                overlay.id = 'pause-overlay';
+                overlay.className = 'pause-overlay';
+                overlay.onclick = () => this.togglePause();
+                document.body.insertBefore(overlay, pauseMenu);
+            }
+            
+            const overlay = document.getElementById('pause-overlay');
+            if (overlay) overlay.classList.add('active');
+            
+            AudioManager.pauseMusic();
         }
     }
     
@@ -429,6 +662,27 @@ class UI {
         document.getElementById('final-sanity').textContent = Math.round(gameState.sanity);
         document.getElementById('total-choices').textContent = gameState.stats.choicesMade;
         
+        // Preencher estatísticas adicionais (se elementos existirem)
+        const daysElement = document.getElementById('total-days');
+        if (daysElement) {
+            daysElement.textContent = gameState.stats.daysElapsed || gameState.currentDay - 1;
+        }
+        
+        const playTimeElement = document.getElementById('play-time');
+        if (playTimeElement) {
+            const minutes = Math.floor((gameState.stats.playTime || 0) / 60);
+            const seconds = (gameState.stats.playTime || 0) % 60;
+            playTimeElement.textContent = `${minutes}m ${seconds}s`;
+        }
+        
+        const minigamesElement = document.getElementById('minigames-total');
+        if (minigamesElement) {
+            const completed = gameState.stats.minigamesCompleted || 0;
+            const correct = gameState.stats.correctAnswers || 0;
+            const accuracy = completed > 0 ? Math.round((correct / completed) * 100) : 0;
+            minigamesElement.textContent = `${correct}/${completed} (${accuracy}%)`;
+        }
+        
         // Aplicar efeitos especiais baseados no final
         if (endingData.id.includes('bad')) {
             document.getElementById('ending-title').style.color = '#ff0000';
@@ -438,6 +692,38 @@ class UI {
             document.getElementById('ending-title').style.color = '#ff00ff';
             document.getElementById('ending').style.animation = 'glitch 0.5s infinite';
         }
+    }
+    
+    /* ==================== ATUALIZAR DIA ==================== */
+    
+    static updateDayDisplay() {
+        const dayElement = document.getElementById('current-day');
+        if (dayElement && game) {
+            dayElement.textContent = `📅 Dia ${game.getCurrentDay()}`;
+        }
+    }
+    
+    static playDayTransition() {
+        console.log('🌅 Reproduzindo transição de dia...');
+        
+        const dayElement = document.getElementById('current-day');
+        if (!dayElement) return;
+        
+        // Remover animação anterior se existir
+        dayElement.style.animation = 'none';
+        
+        // Forçar reflow para reiniciar animação
+        void dayElement.offsetWidth;
+        
+        // Aplicar animações
+        dayElement.style.animation = 'dayBadgeSlide 0.6s ease-out, dayBadgeGlow 1.5s ease-in-out 0.3s';
+        
+        // Som de transição
+        AudioManager.playSFX('click');
+        
+        // Mostrar notificação visual
+        const dayValue = game.getCurrentDay();
+        this.showNotification(`📅 Dia ${dayValue} iniciado!`, 'neutral');
     }
     
     /* ==================== CONFIGURAÇÕES ==================== */

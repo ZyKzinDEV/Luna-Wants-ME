@@ -44,16 +44,17 @@
 
         <!-- TELA DO JOGO -->
         <div id="game" class="screen">
-            <!-- Barra de Sanidade -->
-            <div id="sanity-bar">
-                <div class="sanity-label"><span data-i18n="game.sanity">Sanidade</span>: <span id="sanity-value">100</span>%</div>
-                <div class="sanity-container">
-                    <div id="sanity-fill" style="width: 100%"></div>
+            <!-- Barra de Sanidade e Dia + Botão Pausa -->
+            <div id="game-header">
+                <button id="pause-btn" onclick="UI.togglePause()" title="Pausa (ESC)">⏸</button>
+                <div id="sanity-bar">
+                    <div class="sanity-label"><span data-i18n="game.sanity">Sanidade</span>: <span id="sanity-value">100</span>%</div>
+                    <div class="sanity-container">
+                        <div id="sanity-fill" style="width: 100%"></div>
+                    </div>
                 </div>
+                <div id="current-day">📅 Dia 1</div>
             </div>
-
-            <!-- Menu de Pausa -->
-            <button id="pause-btn" onclick="UI.togglePause()">⏸</button>
             
             <!-- Fundo da Cena -->
             <div id="scene-background"></div>
@@ -106,13 +107,17 @@
         </div>
 
         <!-- MENU DE PAUSA -->
-        <div id="pause-menu" class="overlay-menu" style="display: none;">
-            <div class="overlay-content">
-                <h2 data-i18n="game.pause">Pausa</h2>
-                <button onclick="UI.togglePause()" data-i18n="game.resume">Continuar</button>
-                <button onclick="UI.showScreen('saves')" data-i18n="game.save">Salvar Jogo</button>
-                <button onclick="UI.showScreen('config')" data-i18n="menu.settings">Definições</button>
-                <button onclick="UI.confirmQuit()" data-i18n="game.return">Voltar ao Menu</button>
+        <div id="pause-menu">
+            <div class="overlay-menu">
+                <div class="overlay-content">
+                    <h2 data-i18n="game.pause">⏸ Pausa</h2>
+                    <button onclick="UI.togglePause()" data-i18n="game.resume">▶ Continuar</button>
+                    <button onclick="UI.showMenuOverlay('saves')" data-i18n="game.save">💾 Salvar Jogo</button>
+                    <button onclick="UI.showMenuOverlay('config')" data-i18n="menu.settings">⚙️ Definições</button>
+                    <button onclick="UI.showInventoryOverlay()" title="Abrir inventário">🎒 Inventário</button>
+                    <button onclick="UI.showAchievementsOverlay()" title="Ver achievements">🏆 Achievements</button>
+                    <button onclick="UI.confirmQuit()" data-i18n="game.return">🚪 Voltar ao Menu</button>
+                </div>
             </div>
         </div>
 
@@ -214,11 +219,37 @@
                 <h2 id="ending-title" data-i18n="ending.title"></h2>
                 <div id="ending-text"></div>
                 <div class="ending-stats">
-                    <p><span data-i18n="ending.finalSanity">Sanidade Final</span>: <span id="final-sanity"></span>%</p>
-                    <p><span data-i18n="ending.choices">Escolhas Feitas</span>: <span id="total-choices"></span></p>
+                    <div class="stat-row">
+                        <div class="stat-item">
+                            <span class="stat-label" data-i18n="ending.finalSanity">Sanidade Final</span>
+                            <span class="stat-value" id="final-sanity">0</span>%
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-label" data-i18n="ending.choices">Escolhas Feitas</span>
+                            <span class="stat-value" id="total-choices">0</span>
+                        </div>
+                    </div>
+                    <div class="stat-row">
+                        <div class="stat-item">
+                            <span class="stat-label">📅 Dias Decorridos</span>
+                            <span class="stat-value" id="total-days">0</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-label">⏱️ Tempo de Jogo</span>
+                            <span class="stat-value" id="play-time">0m 0s</span>
+                        </div>
+                    </div>
+                    <div class="stat-row">
+                        <div class="stat-item stat-full">
+                            <span class="stat-label">🎮 Minijogos</span>
+                            <span class="stat-value" id="minigames-total">0/0</span>
+                        </div>
+                    </div>
                 </div>
-                <button onclick="UI.goToMenu()" data-i18n="ending.mainMenu">Menu Principal</button>
-                <button onclick="UI.replayGame()" data-i18n="ending.playAgain">Jogar Novamente</button>
+                <div class="ending-buttons">
+                    <button onclick="UI.goToMenu()" data-i18n="ending.mainMenu">Menu Principal</button>
+                    <button onclick="UI.replayGame()" data-i18n="ending.playAgain">Jogar Novamente</button>
+                </div>
             </div>
         </div>
 
@@ -238,9 +269,16 @@
     <script src="js/audio.js"></script>
     <script src="js/save-system.js"></script>
     <script src="js/minigames.js"></script>
+    <script src="js/exploration-system.js"></script>
+    <script src="js/inventory-system.js"></script>
+    <script src="js/achievement-system.js"></script>
+    <script src="js/performance-optimization.js"></script>
     <script src="js/story.js"></script>
+    <script src="js/story-expansion.js"></script>
+    <script src="js/story-new-systems.js"></script>
     <script src="js/ui.js"></script>
     <script src="js/game.js"></script>
+    <script src="js/test-suite.js"></script>
 
 </body>
 </html>

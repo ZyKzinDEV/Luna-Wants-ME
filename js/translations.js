@@ -75,6 +75,18 @@ class Translations {
             'ending.choices': 'Escolhas Feitas',
             'ending.playAgain': 'Jogar Novamente',
             'ending.mainMenu': 'Menu Principal',
+            
+            // Day System
+            'day.transition': 'Transição de Dia',
+            'day.new': 'Novo Dia!',
+            'day.started': 'iniciado!',
+            
+            // Game Stats
+            'game.stats': 'Estatísticas',
+            'game.playTime': 'Tempo de Jogo',
+            'game.daysElapsed': 'Dias Decorridos',
+            'game.minigames': 'Minijogos',
+            'game.relationship': 'Relacionamento',
         },
         
         'en-US': {
@@ -133,6 +145,18 @@ class Translations {
             'ending.choices': 'Choices Made',
             'ending.playAgain': 'Play Again',
             'ending.mainMenu': 'Main Menu',
+            
+            // Day System
+            'day.transition': 'Day Transition',
+            'day.new': 'New Day!',
+            'day.started': 'started!',
+            
+            // Game Stats
+            'game.stats': 'Statistics',
+            'game.playTime': 'Play Time',
+            'game.daysElapsed': 'Days Elapsed',
+            'game.minigames': 'Minigames',
+            'game.relationship': 'Relationship',
             
             // Dialogues - Chapter 1
             'dialogue.Segunda-feira, 7h30 da manhã. Mais um dia comum.': 'Monday, 7:30 AM. Another ordinary day.',

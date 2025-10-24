@@ -11,6 +11,7 @@ class Game {
             choices: {},
             playerName: '',
             playerNameAsked: false,
+            currentDay: 1,
             relationships: {
                 luna: 0  // -100 a +100: ódio a amor obsessivo
             },
@@ -29,7 +30,8 @@ class Game {
                 choicesMade: 0,
                 scenesViewed: [],
                 minigamesCompleted: 0,
-                correctAnswers: 0
+                correctAnswers: 0,
+                daysElapsed: 0
             }
         };
         
@@ -105,6 +107,7 @@ class Game {
             choices: {},
             playerName: '',
             playerNameAsked: false,
+            currentDay: 1,
             flags: {
                 respondeuBem: false,
                 aceitouCarona: false,
@@ -116,7 +119,10 @@ class Game {
             stats: {
                 playTime: 0,
                 choicesMade: 0,
-                scenesViewed: []
+                scenesViewed: [],
+                minigamesCompleted: 0,
+                correctAnswers: 0,
+                daysElapsed: 0
             }
         };
         
@@ -279,6 +285,125 @@ class Game {
                 }
                 break;
                 
+            case 'phoneHacking':
+                MiniGames.phoneHacking(minigameData.correctCode, minigameData.hint, (success) => {
+                    this.state.stats.minigamesCompleted++;
+                    if (success) {
+                        this.state.stats.correctAnswers++;
+                    }
+                    if (minigameData.onComplete) {
+                        minigameData.onComplete(success);
+                    } else {
+                        setTimeout(() => this.nextLine(), 500);
+                    }
+                });
+                break;
+                
+            case 'memoryGame':
+                MiniGames.memoryGame((success) => {
+                    this.state.stats.minigamesCompleted++;
+                    if (success) {
+                        this.state.stats.correctAnswers++;
+                    }
+                    if (minigameData.onComplete) {
+                        minigameData.onComplete(success);
+                    } else {
+                        setTimeout(() => this.nextLine(), 500);
+                    }
+                });
+                break;
+                
+            case 'dialogueBattle':
+                MiniGames.dialogueBattle(minigameData.arguments, (success) => {
+                    this.state.stats.minigamesCompleted++;
+                    if (success) {
+                        this.state.stats.correctAnswers++;
+                    }
+                    if (minigameData.onComplete) {
+                        minigameData.onComplete(success);
+                    } else {
+                        setTimeout(() => this.nextLine(), 500);
+                    }
+                });
+                break;
+                
+            case 'observationChallenge':
+                MiniGames.observationChallenge(minigameData.items, (success) => {
+                    this.state.stats.minigamesCompleted++;
+                    if (success) {
+                        this.state.stats.correctAnswers++;
+                    }
+                    if (minigameData.onComplete) {
+                        minigameData.onComplete(success);
+                    } else {
+                        setTimeout(() => this.nextLine(), 500);
+                    }
+                });
+                break;
+                
+            case 'rhythmGame':
+                MiniGames.rhythmGame((success) => {
+                    this.state.stats.minigamesCompleted++;
+                    if (success) {
+                        this.state.stats.correctAnswers++;
+                    }
+                    if (minigameData.onComplete) {
+                        minigameData.onComplete(success);
+                    } else {
+                        setTimeout(() => this.nextLine(), 500);
+                    }
+                });
+                break;
+                
+            case 'hackingGame':
+                MiniGames.hackingGame(minigameData.code, minigameData.attempts || 5, (success) => {
+                    this.state.stats.minigamesCompleted++;
+                    if (success) {
+                        this.state.stats.correctAnswers++;
+                    }
+                    if (minigameData.onComplete) {
+                        minigameData.onComplete(success);
+                    } else {
+                        setTimeout(() => this.nextLine(), 500);
+                    }
+                });
+                break;
+                
+            case 'simonGame':
+                MiniGames.simonGame((success) => {
+                    this.state.stats.minigamesCompleted++;
+                    if (success) {
+                        this.state.stats.correctAnswers++;
+                    }
+                    if (minigameData.onComplete) {
+                        minigameData.onComplete(success);
+                    } else {
+                        setTimeout(() => this.nextLine(), 500);
+                    }
+                });
+                break;
+                
+            case 'moralChoice':
+                MiniGames.moralChoice(minigameData.scenario, minigameData.options, (consequence) => {
+                    this.state.stats.minigamesCompleted++;
+                    // Processar consequência (pode modificar relacionamento, flags, etc)
+                    if (consequence.relationshipChange) {
+                        this.modifyRelationship('luna', consequence.relationshipChange);
+                    }
+                    if (consequence.sanityChange) {
+                        this.changeSanity(consequence.sanityChange);
+                    }
+                    if (consequence.flag) {
+                        this.state.flags[consequence.flag] = true;
+                    }
+                    if (minigameData.onComplete) {
+                        minigameData.onComplete(consequence);
+                    } else {
+                        setTimeout(() => this.nextLine(), 500);
+                    }
+                });
+                break;
+                
             default:
                 console.warn(`⚠️ Tipo de minijogo desconhecido: ${type}`);
                 setTimeout(() => this.nextLine(), 500);
@@ -339,17 +464,14 @@ class Game {
             return;
         }
         
-        // Se for final
-        if (line.ending) {
+        // Se for final (com ou sem texto anterior)
+        if (line.ending && !line.text) {
             this.showEnding(line);
             return;
         }
         
-        // Se for transição para nova cena
-        if (line.next) {
-            this.loadScene(line.next);
-            return;
-        }
+        // IMPORTANTE: Aplicar efeitos ANTES de exibir texto
+        // Isso garante que músicas, backgrounds e portrats estejam prontos
         
         // Aplicar efeitos antes de mostrar
         if (line.effect) {
@@ -383,30 +505,46 @@ class Game {
             UI.applyVisualEffect(line.visualEffect);
         }
         
-        // Traduzir nome do personagem e texto do diálogo
-        const translatedName = Translations.getDialogue(line.name) || line.name;
-        let translatedText = Translations.getDialogue(line.text);
-        
-        // Processar placeholders de nome do jogador
-        translatedText = this.processDialogueText(translatedText);
-        
-        // Mostrar diálogo com efeito de digitação
-        UI.showDialogue(translatedName, translatedText, this.config.textSpeed);
-        
-        // Tocar SFX
-        if (line.sfx) {
-            AudioManager.playSFX(line.sfx);
+        // Se há texto nesta linha, mostrar
+        if (line.text) {
+            // Traduzir nome do personagem e texto do diálogo
+            const translatedName = Translations.getDialogue(line.name) || line.name;
+            let translatedText = Translations.getDialogue(line.text) || line.text;
+            
+            // Processar placeholders de nome do jogador
+            translatedText = this.processDialogueText(translatedText);
+            
+            // Mostrar diálogo com efeito de digitação
+            UI.showDialogue(translatedName, translatedText, this.config.textSpeed);
+            
+            // Tocar SFX
+            if (line.sfx) {
+                AudioManager.playSFX(line.sfx);
+            }
+            
+            // Mostrar dica de clique
+            UI.showClickHint();
+        } else if (line.next) {
+            // Se não há texto mas há próxima cena, transicionar após breve delay
+            setTimeout(() => {
+                console.log(`🔄 Transicionando para cena: ${line.next}`);
+                this.loadScene(line.next);
+            }, 300);
+        } else if (line.ending) {
+            // Se é um final, mostrar agora
+            this.showEnding(line);
+        } else {
+            // Caso especial: linha sem texto, sem próxima cena, sem final
+            console.warn('⚠️ Linha sem conteúdo detectada');
+            UI.showClickHint();
         }
-        
-        // Mostrar dica de clique
-        UI.showClickHint();
     }
     
     handleClick() {
         console.log('🖱️ Clique detectado! typing:', this.state.typing);
         
         // Ignorar se estiver em menu de pausa
-        if (document.getElementById('pause-menu').style.display !== 'none') {
+        if (document.getElementById('pause-menu').classList.contains('active')) {
             console.log('⚠️ Menu de pausa está aberto, ignorando clique');
             return;
         }
@@ -433,7 +571,24 @@ class Game {
             console.log(`✅ Avançado para linha ${this.state.currentIndex}`);
             this.showDialogue();
         } else {
-            console.log('📍 Fim da cena');
+            console.log('📍 Fim da cena - procurando próxima ação');
+            const lastLine = scene[scene.length - 1];
+            
+            // Se há uma próxima cena definida na última linha
+            if (lastLine && lastLine.next) {
+                console.log(`📖 Carregando próxima cena: ${lastLine.next}`);
+                this.loadScene(lastLine.next);
+            } 
+            // Se há um final definido
+            else if (lastLine && lastLine.ending) {
+                console.log('🏁 Mostrando tela de final');
+                this.showEnding(lastLine);
+            }
+            // Se nenhum dos anteriores, erro
+            else {
+                console.error('❌ Fim da cena sem próxima ação definida!');
+                UI.showNotification('Erro: Cena não tem continuação', 'error');
+            }
         }
     }
     
@@ -518,12 +673,19 @@ class Game {
         // Parar contador de tempo
         this.stopPlayTime();
         
+        // Calcular dias decorridos
+        this.state.stats.daysElapsed = this.state.currentDay - 1;
+        
         // Salvar estatísticas
         const finalStats = {
             ending: endingData.id,
             sanity: this.state.sanity,
             choicesMade: this.state.stats.choicesMade,
-            playTime: this.state.stats.playTime
+            playTime: this.state.stats.playTime,
+            daysElapsed: this.state.stats.daysElapsed,
+            minigamesCompleted: this.state.stats.minigamesCompleted,
+            correctAnswers: this.state.stats.correctAnswers,
+            relationshipLevel: this.getRelationshipLevel('luna')
         };
         
         SaveSystem.saveEnding(endingData.id, finalStats);
@@ -531,10 +693,34 @@ class Game {
         // Mostrar créditos primeiro, depois a tela final
         UI.currentEndingData = endingData;
         UI.currentGameState = this.state;
+        UI.currentFinalStats = finalStats;
         UI.showCredits(endingData);
         
         // Música de final
         AudioManager.playMusic('final');
+    }
+    
+    /* ==================== SISTEMA DE DIAS ==================== */
+    
+    advanceDay(showTransition = false) {
+        this.state.currentDay++;
+        this.state.stats.daysElapsed = this.state.currentDay - 1;
+        console.log(`📅 Avançado para Dia ${this.state.currentDay}`);
+        
+        // Atualizar display
+        UI.updateDayDisplay();
+        
+        // Animar transição se solicitado
+        if (showTransition) {
+            UI.playDayTransition();
+        }
+        
+        // Auto-save
+        SaveSystem.autoSave(this.state);
+    }
+    
+    getCurrentDay() {
+        return this.state.currentDay;
     }
     
     /* ==================== TEMPO DE JOGO ==================== */

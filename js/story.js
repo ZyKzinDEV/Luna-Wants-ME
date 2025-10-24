@@ -54,7 +54,7 @@ const STORY = {
     cap1_inicio: [
         {
             name: 'Narrador',
-            text: 'Segunda-feira, 7h30 da manhã. Mais um dia comum.',
+            text: 'Dia 1: Segunda-feira, 7h30 da manhã. Mais um dia comum.',
             background: 'rua',
             hidePortrait: true,
             music: 'normal'
@@ -76,7 +76,7 @@ const STORY = {
             sanity: -2
         },
         {
-            name: '???',
+            name: 'Luna',
             text: 'Olá! ♥',
             portrait: 'feliz',
             character: 'luna',
@@ -305,12 +305,16 @@ const STORY = {
                 {
                     text: '✅ "Claro, obrigado pela carona."',
                     next: 'cap1_celular',
-                    effect: (state) => state.flags.aceitouCarona = true,
+                    effect: (state) => {
+                        state.flags.aceitouCarona = true;
+                        game.advanceDay(true); // Avanço para o próximo dia com transição visual
+                    },
                     sanity: -10
                 },
                 {
                     text: '❌ "Não, obrigado. Prefiro caminhar."',
                     next: 'cap2_recusa',
+                    effect: (state) => game.advanceDay(true),
                     sanity: -5
                 }
             ]
@@ -1770,8 +1774,8 @@ const STORY = {
         {
             ending: true,
             id: 'secret_ending',
-            title: 'Final Secreto: ???',
-            text: 'Algo estranho aconteceu. Você percebe que talvez... talvez Luna não fosse a única obcecada. Você olha para o espelho e vê suas próprias fotos de Luna coladas na parede do seu quarto. Quando isso aconteceu? Quem é realmente a vítima aqui?',
+            title: 'Final Secreto: Obsessão Mútua',
+            text: 'Algo estranho aconteceu. Você percebe que talvez... talvez Luna não fosse a única obcecada. Você olha para o espelho e vê suas próprias fotos de Luna coladas na parede do seu quarto. Quando isso aconteceu? Quem é realmente a vítima aqui? A obsessão virou um jogo sem vencedores. Apenas duas almas perdidas, presas em um ciclo do qual nenhum deles consegue escapar. Talvez seja isso que significa verdadeiro amor.',
             music: 'final'
         }
     ]
